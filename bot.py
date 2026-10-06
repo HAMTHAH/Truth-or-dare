@@ -375,27 +375,87 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         if game["challenge_id"] != challenge_id:
 
-            result = InlineQueryResultArticle(
-                id=f"old_answer_{make_id()}",
+    # The question is old, but give the player
+    # a NEW usable panel instead of a dead-end message.
 
-                title="⚠️ OLD QUESTION",
+    player = get_player(game, query.from_user.id)
 
-                description="This question has already been completed.",
+    if not player:
 
-                input_message_content=InputTextMessageContent(
-                    "⚠️ <b>This is an old question.</b>\n\n"
-                    "Use the newest game panel.",
-                    parse_mode="HTML",
-                ),
-            )
+        result = InlineQueryResultArticle(
+            id=f"old_answer_{make_id()}",
+            title="⚠️ OLD QUESTION",
+            description="You are not part of this game.",
+            input_message_content=InputTextMessageContent(
+                "⚠️ You are not one of the players."
+            ),
+        )
 
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
+        await query.answer(
+            [result],
+            cache_time=0,
+            is_personal=True
+        )
 
-            return
+        return
+
+    # If it is this player's turn, give them
+    # the actual current challenge buttons.
+    if player == game["turn"]:
+
+        result = InlineQueryResultArticle(
+            id=f"new_panel_{make_id()}",
+
+            title="🎮 CONTINUE GAME",
+
+            description="Choose the next Truth, Dare or Random.",
+
+            input_message_content=InputTextMessageContent(
+                f"⚠️ <b>That question is already closed.</b>\n\n"
+                f"🎯 <b>{get_name(game, player)}'s turn</b>\n\n"
+                f"Choose your next challenge.",
+                parse_mode="HTML",
+            ),
+
+            reply_markup=challenge_buttons(code)
+        )
+
+        await query.answer(
+            [result],
+            cache_time=0,
+            is_personal=True
+        )
+
+        return
+
+    # It is the other player's turn.
+    # Still show the current game state, but don't pretend
+    # that this player can play.
+
+    result = InlineQueryResultArticle(
+        id=f"waiting_panel_{make_id()}",
+
+        title="⏳ WAIT FOR YOUR TURN",
+
+        description=f"It's {get_name(game, game['turn'])}'s turn.",
+
+        input_message_content=InputTextMessageContent(
+            f"⚠️ <b>That question is already closed.</b>\n\n"
+            f"⏳ It's <b>{get_name(game, game['turn'])}'s turn</b>.\n\n"
+            f"Use the newest game panel when it's your turn.",
+            parse_mode="HTML",
+        ),
+
+        reply_markup=challenge_buttons(code)
+    )
+
+    await query.answer(
+        [result],
+        cache_time=0,
+        is_personal=True
+    )
+
+    return
 
         # Now check challenge type
         if game["challenge_type"] != "truth":
