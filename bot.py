@@ -6,6 +6,8 @@ from telegram import (
     Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
+    InlineQueryResultArticle,
+    InputTextMessageContent,
 )
 from telegram.ext import (
     Application,
@@ -14,8 +16,6 @@ from telegram.ext import (
     CallbackQueryHandler,
     ContextTypes,
 )
-from telegram.constants import ParseMode
-
 
 TOKEN = os.getenv("BOT_TOKEN")
 
@@ -121,38 +121,30 @@ DARES = [
 ]
 
 # ============================================================
-# GAME STORAGE
+# GAMES
 # ============================================================
 
 games = {}
 
 
-def new_game():
+def create_game(player_id, player_name):
     return {
-        "p1_id": None,
-        "p1_name": None,
+        "p1_id": player_id,
+        "p1_name": player_name,
+
         "p2_id": None,
         "p2_name": None,
-        "active": False,
 
-        # 1 = Player 1
-        # 2 = Player 2
+        "started": False,
+
+        # Always 1 -> 2 -> 1 -> 2
         "turn": 1,
 
         # Current challenge
         "challenge_id": None,
         "challenge_type": None,
         "challenge_player": None,
-        "challenge_text": None,
     }
-
-
-# ============================================================
-# HELPERS
-# ============================================================
-
-def get_game(code):
-    return games.get(code)
 
 
 def get_player(game, user_id):
@@ -165,37 +157,43 @@ def get_player(game, user_id):
     return None
 
 
-def player_name(game, number):
-    if number == 1:
+def get_name(game, player):
+    if player == 1:
         return game["p1_name"]
-
     return game["p2_name"]
 
 
-def other_player(number):
-    return 2 if number == 1 else 1
+def next_player(player):
+    return 2 if player == 1 else 1
 
 
-def game_buttons(code, challenge_id):
+# ============================================================
+# BUTTONS
+# ============================================================
+
+def choice_buttons(code, challenge_id=""):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
                 "🔥 TRUTH",
-                switch_inline_query_current_chat=f"truth {code} {challenge_id}"
+                switch_inline_query_current_chat=
+                f"truth {code} {challenge_id}"
             ),
             InlineKeyboardButton(
                 "😈 DARE",
-                switch_inline_query_current_chat=f"dare {code} {challenge_id}"
+                switch_inline_query_current_chat=
+                f"dare {code} {challenge_id}"
             ),
             InlineKeyboardButton(
                 "🎲 RANDOM",
-                switch_inline_query_current_chat=f"random {code} {challenge_id}"
+                switch_inline_query_current_chat=
+                f"random {code} {challenge_id}"
             ),
         ]
     ])
 
 
-def lobby_buttons(code):
+def join_button(code):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
@@ -206,46 +204,15 @@ def lobby_buttons(code):
     ])
 
 
-def start_buttons(code):
+def start_button(code):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
-                "🎮 START GAME",
+                "▶️ START GAME",
                 callback_data=f"start:{code}"
             )
         ]
     ])
-
-
-def make_challenge(game, challenge_type, player):
-    if challenge_type == "truth":
-        text = random.choice(TRUTHS)
-        emoji = "🔥"
-        title = "TRUTH"
-
-    elif challenge_type == "dare":
-        text = random.choice(DARES)
-        emoji = "😈"
-        title = "DARE"
-
-    else:
-        if random.choice([True, False]):
-            text = random.choice(TRUTHS)
-            emoji = "🔥"
-            title = "TRUTH"
-        else:
-            text = random.choice(DARES)
-            emoji = "😈"
-            title = "DARE"
-
-    challenge_id = uuid.uuid4().hex[:10]
-
-    game["challenge_id"] = challenge_id
-    game["challenge_type"] = title.lower()
-    game["challenge_player"] = player
-    game["challenge_text"] = text
-
-    return challenge_id, emoji, title, text
 
 
 # ============================================================
@@ -254,29 +221,23 @@ def make_challenge(game, challenge_type, player):
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    text = (
-        "🎮 <b>NAUGHTY TRUTH OR DARE</b>\n\n"
-        "Play a private 1-on-1 Truth or Dare game.\n\n"
-        "To play with someone:\n"
-        "1️⃣ Open any private chat\n"
-        "2️⃣ Type <code>@NAUGHTYDARE_bot</code>\n"
-        "3️⃣ Send the game to the chat\n\n"
-        "🔥 No gender selection\n"
-        "🔥 Players are saved automatically\n"
-        "🔥 Turns are P1 → P2 → P1 → P2"
-    )
-
     await update.message.reply_text(
-        text,
-        parse_mode=ParseMode.HTML
+        "🎮 <b>NAUGHTY TRUTH OR DARE</b>\n\n"
+        "Open a private chat and type:\n\n"
+        "<code>@NAUGHTYDARE_bot</code>\n\n"
+        "Then choose the game.",
+        parse_mode="HTML"
     )
 
 
 # ============================================================
-# INLINE QUERY
+# INLINE
 # ============================================================
 
-async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def inline_query(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
 
     query = update.inline_query
     user = query.from_user
@@ -284,34 +245,33 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = query.query.strip()
 
     # --------------------------------------------------------
-    # Empty inline query = create lobby
+    # CREATE NEW GAME
     # --------------------------------------------------------
 
     if not text:
 
         code = uuid.uuid4().hex[:8]
 
-        games[code] = new_game()
+        games[code] = create_game(
+            user.id,
+            user.first_name or "Player 1"
+        )
 
         game = games[code]
 
-        game["p1_id"] = user.id
-        game["p1_name"] = user.first_name or "Player 1"
-
-        from telegram import InlineQueryResultArticle, InputTextMessageContent
-
         result = InlineQueryResultArticle(
-            id=f"lobby_{code}",
+            id=f"game_{code}",
             title="🎮 START 1-ON-1 GAME",
-            description="Start a Truth or Dare game in this chat",
+            description="Create a private Truth or Dare game",
             input_message_content=InputTextMessageContent(
                 "🎮 <b>TRUTH OR DARE</b>\n\n"
-                f"👤 <b>Player 1:</b> {game['p1_name']}\n"
-                "👤 <b>Player 2:</b> Waiting...\n\n"
-                "Send this game to your chat and let your partner join.",
-                parse_mode=ParseMode.HTML
+                f"👤 Player 1: <b>{game['p1_name']}</b>\n"
+                "👤 Player 2: <b>Waiting...</b>\n\n"
+                "Send this game to the chat.\n"
+                "Your partner can tap JOIN GAME.",
+                parse_mode="HTML"
             ),
-            reply_markup=lobby_buttons(code)
+            reply_markup=join_button(code)
         )
 
         await query.answer(
@@ -323,7 +283,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # --------------------------------------------------------
-    # Parse query
+    # READ COMMAND
     # --------------------------------------------------------
 
     parts = text.split()
@@ -335,18 +295,24 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     action = parts[0].lower()
     code = parts[1]
 
-    game = get_game(code)
+    game = games.get(code)
 
     if not game:
         await query.answer([], cache_time=0)
         return
 
-    previous_id = parts[2] if len(parts) >= 3 else ""
+    old_challenge_id = ""
+
+    if len(parts) >= 3:
+        old_challenge_id = parts[2]
+
+    # --------------------------------------------------------
+    # PLAYER CHECK
+    # --------------------------------------------------------
 
     player = get_player(game, user.id)
 
     if player is None:
-        from telegram import InlineQueryResultArticle, InputTextMessageContent
 
         result = InlineQueryResultArticle(
             id=f"notplayer_{uuid.uuid4().hex}",
@@ -369,16 +335,14 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # GAME NOT STARTED
     # --------------------------------------------------------
 
-    if not game["active"]:
-
-        from telegram import InlineQueryResultArticle, InputTextMessageContent
+    if not game["started"]:
 
         result = InlineQueryResultArticle(
             id=f"waiting_{uuid.uuid4().hex}",
-            title="⏳ WAITING FOR GAME",
-            description="The game has not started yet",
+            title="⏳ GAME NOT STARTED",
+            description="Player 1 must start the game",
             input_message_content=InputTextMessageContent(
-                "⏳ Waiting for the second player to join."
+                "⏳ The game has not started yet."
             )
         )
 
@@ -390,67 +354,29 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # ========================================================
-    # OLD PANEL CHECK
-    # ========================================================
-    #
-    # This MUST happen before turn checking.
-    #
-    # Old buttons remain visible in Telegram, so we identify
-    # them using challenge_id.
-    # ========================================================
+    # --------------------------------------------------------
+    # OLD BUTTON
+    # --------------------------------------------------------
 
-    if previous_id and game["challenge_id"]:
+    if (
+        old_challenge_id
+        and game["challenge_id"]
+        and old_challenge_id != game["challenge_id"]
+    ):
 
-        if previous_id != game["challenge_id"]:
-
-            from telegram import InlineQueryResultArticle, InputTextMessageContent
-
-            current_player = game["turn"]
-            current_name = player_name(game, current_player)
-
-            result = InlineQueryResultArticle(
-                id=f"old_{uuid.uuid4().hex}",
-                title="⚠️ OLD PANEL — CONTINUE GAME",
-                description=f"Current turn: {current_name}",
-                input_message_content=InputTextMessageContent(
-                    "⚠️ <b>This is an old challenge panel.</b>\n\n"
-                    f"🎯 It is now <b>{current_name}</b>'s turn.\n\n"
-                    "Use the buttons below to choose the next challenge."
-                ),
-                reply_markup=game_buttons(
-                    code,
-                    game["challenge_id"]
-                )
-            )
-
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
-
-            return
-
-    # ========================================================
-    # TURN CHECK
-    # ========================================================
-
-    if player != game["turn"]:
-
-        from telegram import InlineQueryResultArticle, InputTextMessageContent
-
-        current_name = player_name(game, game["turn"])
+        current_player = game["turn"]
+        current_name = get_name(game, current_player)
 
         result = InlineQueryResultArticle(
-            id=f"wait_{uuid.uuid4().hex}",
-            title="⏳ WAIT FOR YOUR TURN",
-            description=f"{current_name}'s turn",
+            id=f"old_{uuid.uuid4().hex}",
+            title="⚠️ OLD PANEL",
+            description=f"Current turn: {current_name}",
             input_message_content=InputTextMessageContent(
-                f"⏳ <b>Wait for your turn.</b>\n\n"
-                f"🎯 It is <b>{current_name}</b>'s turn."
+                "⚠️ <b>That is an old challenge.</b>\n\n"
+                f"🎯 Current turn: <b>{current_name}</b>\n\n"
+                "Use the buttons below."
             ),
-            reply_markup=game_buttons(
+            reply_markup=choice_buttons(
                 code,
                 game["challenge_id"]
             )
@@ -464,9 +390,39 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # ========================================================
-    # PLAYER CHOOSES NEXT CHALLENGE
-    # ========================================================
+    # --------------------------------------------------------
+    # WRONG PLAYER
+    # --------------------------------------------------------
+
+    if player != game["turn"]:
+
+        current_name = get_name(game, game["turn"])
+
+        result = InlineQueryResultArticle(
+            id=f"wait_{uuid.uuid4().hex}",
+            title="⏳ WAIT FOR YOUR TURN",
+            description=f"{current_name}'s turn",
+            input_message_content=InputTextMessageContent(
+                "⏳ <b>WAIT FOR YOUR TURN</b>\n\n"
+                f"🎯 It is <b>{current_name}</b>'s turn."
+            ),
+            reply_markup=choice_buttons(
+                code,
+                game["challenge_id"] or ""
+            )
+        )
+
+        await query.answer(
+            [result],
+            cache_time=0,
+            is_personal=True
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # ONLY THESE 3 COMMANDS ARE VALID
+    # --------------------------------------------------------
 
     if action not in ("truth", "dare", "random"):
 
@@ -474,51 +430,71 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # --------------------------------------------------------
-    # If there is a current challenge:
+    # BUTTON PRESS = FINISH CURRENT TURN
     #
-    # Choosing a button means the current player has finished
-    # their challenge and is giving the turn to the other player.
+    # If there was already a challenge, move to the other
+    # player BEFORE creating the new challenge.
     # --------------------------------------------------------
 
-    if game["challenge_id"]:
+    if game["challenge_id"] is not None:
+        game["turn"] = next_player(game["turn"])
 
-        game["turn"] = other_player(game["turn"])
+    current_player = game["turn"]
+    current_name = get_name(game, current_player)
 
     # --------------------------------------------------------
-    # Create challenge for the new/current player
+    # CREATE CHALLENGE
     # --------------------------------------------------------
 
-    challenge_player = game["turn"]
+    if action == "truth":
 
-    challenge_id, emoji, title, challenge_text = make_challenge(
-        game,
-        action,
-        challenge_player
-    )
+        challenge = random.choice(TRUTHS)
+        emoji = "🔥"
+        title = "TRUTH"
 
-    challenge_name = player_name(
-        game,
-        challenge_player
-    )
+    elif action == "dare":
 
-    from telegram import InlineQueryResultArticle, InputTextMessageContent
+        challenge = random.choice(DARES)
+        emoji = "😈"
+        title = "DARE"
+
+    else:
+
+        if random.choice([True, False]):
+            challenge = random.choice(TRUTHS)
+            emoji = "🔥"
+            title = "TRUTH"
+        else:
+            challenge = random.choice(DARES)
+            emoji = "😈"
+            title = "DARE"
+
+    challenge_id = uuid.uuid4().hex[:10]
+
+    game["challenge_id"] = challenge_id
+    game["challenge_type"] = title.lower()
+    game["challenge_player"] = current_player
+
+    # --------------------------------------------------------
+    # NEW PANEL
+    # --------------------------------------------------------
 
     message = (
         f"{emoji} <b>{title}</b>\n\n"
-        f"<b>{challenge_text}</b>\n\n"
-        f"🎯 <b>{challenge_name}'s turn</b>\n\n"
-        "Choose what the next challenge should be:"
+        f"<b>{challenge}</b>\n\n"
+        f"🎯 <b>{current_name}'s turn</b>\n\n"
+        "When you're finished, choose the next challenge:"
     )
 
     result = InlineQueryResultArticle(
         id=f"challenge_{challenge_id}",
-        title=f"{emoji} {title} — {challenge_name}",
-        description=challenge_text[:100],
+        title=f"{emoji} {title} — {current_name}",
+        description=challenge[:100],
         input_message_content=InputTextMessageContent(
             message,
-            parse_mode=ParseMode.HTML
+            parse_mode="HTML"
         ),
-        reply_markup=game_buttons(
+        reply_markup=choice_buttons(
             code,
             challenge_id
         )
@@ -535,22 +511,24 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # CALLBACKS
 # ============================================================
 
-async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def callbacks(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE
+):
 
     query = update.callback_query
-    await query.answer()
-
     data = query.data
 
-    # --------------------------------------------------------
+    await query.answer()
+
+    # ========================================================
     # JOIN
-    # --------------------------------------------------------
+    # ========================================================
 
     if data.startswith("join:"):
 
         code = data.split(":", 1)[1]
-
-        game = get_game(code)
+        game = games.get(code)
 
         if not game:
             await query.edit_message_text(
@@ -560,7 +538,7 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         user = query.from_user
 
-        # Player 1 clicking join
+        # Player 1
         if user.id == game["p1_id"]:
 
             await query.answer(
@@ -569,29 +547,24 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        # Someone else becomes Player 2
+        # Player 2
         if game["p2_id"] is None:
 
             game["p2_id"] = user.id
             game["p2_name"] = user.first_name or "Player 2"
 
-            text = (
+            await query.edit_message_text(
                 "🎮 <b>TRUTH OR DARE</b>\n\n"
                 f"👤 Player 1: <b>{game['p1_name']}</b>\n"
                 f"👤 Player 2: <b>{game['p2_name']}</b>\n\n"
-                "✅ Both players joined!\n\n"
-                "Player 1 can start the game."
-            )
-
-            await query.edit_message_text(
-                text,
-                parse_mode=ParseMode.HTML,
-                reply_markup=start_buttons(code)
+                "✅ <b>Both players joined!</b>\n\n"
+                "Player 1 can start the game.",
+                parse_mode="HTML",
+                reply_markup=start_button(code)
             )
 
             return
 
-        # Game already has two players
         await query.answer(
             "This game already has two players.",
             show_alert=True
@@ -599,15 +572,14 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # --------------------------------------------------------
+    # ========================================================
     # START
-    # --------------------------------------------------------
+    # ========================================================
 
     if data.startswith("start:"):
 
         code = data.split(":", 1)[1]
-
-        game = get_game(code)
+        game = games.get(code)
 
         if not game:
             await query.edit_message_text(
@@ -618,6 +590,7 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user = query.from_user
 
         if user.id != game["p1_id"]:
+
             await query.answer(
                 "Only Player 1 can start the game.",
                 show_alert=True
@@ -625,49 +598,48 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         if game["p2_id"] is None:
+
             await query.answer(
                 "Waiting for Player 2.",
                 show_alert=True
             )
             return
 
-        game["active"] = True
+        # Reset game
+        game["started"] = True
         game["turn"] = 1
-
         game["challenge_id"] = None
         game["challenge_type"] = None
         game["challenge_player"] = None
-        game["challenge_text"] = None
 
-        text = (
+        # IMPORTANT:
+        # First panel already has Truth/Dare/Random.
+        message = (
             "🔥 <b>GAME STARTED!</b>\n\n"
             f"👤 Player 1: <b>{game['p1_name']}</b>\n"
             f"👤 Player 2: <b>{game['p2_name']}</b>\n\n"
             f"🎯 <b>{game['p1_name']}'s turn</b>\n\n"
-            "Type <code>@NAUGHTYDARE_bot</code> "
-            "in this chat and choose:\n\n"
-            "🔥 Truth\n"
-            "😈 Dare\n"
-            "🎲 Random"
+            "Choose your challenge:"
         )
 
         await query.edit_message_text(
-            text,
-            parse_mode=ParseMode.HTML
+            message,
+            parse_mode="HTML",
+            reply_markup=choice_buttons(code, "")
         )
 
         return
 
 
 # ============================================================
-# MAIN
+# RUN BOT
 # ============================================================
 
 def main():
 
     if not TOKEN:
         raise RuntimeError(
-            "BOT_TOKEN environment variable is missing."
+            "BOT_TOKEN is missing from environment variables."
         )
 
     app = Application.builder().token(TOKEN).build()
@@ -681,10 +653,10 @@ def main():
     )
 
     app.add_handler(
-        CallbackQueryHandler(callback)
+        CallbackQueryHandler(callbacks)
     )
 
-    print("NAUGHTYDARE bot is running...")
+    print("🔥 NAUGHTYDARE BOT IS RUNNING")
 
     app.run_polling(
         allowed_updates=Update.ALL_TYPES
