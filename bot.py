@@ -293,125 +293,49 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    inline = update.inline_query
-    query = inline.query.strip().lower()
+    query = update.inline_query
+    code = secrets.token_hex(5)
 
-    print("INLINE QUERY:", query)
+    results = [
+        InlineQueryResultArticle(
+            id="start_game",
+            title="🎮 START 1-ON-1 GAME",
+            description="Play Truth or Dare with another person",
+            input_message_content=InputTextMessageContent(
+                "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
+                "Tap OPEN GAME to start your 1-on-1 game!"
+            ),
+            reply_markup=InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton(
+                        "🎮 OPEN GAME",
+                        url=f"https://t.me/NAUGHTYDARE_bot?start={code}"
+                    )
+                ]
+            ])
+        )
+    ]
 
-    results = []
-
-    if query == "":
-        code = create_game(inline.from_user.id)
+    # Add the normal Truth/Dare results underneath
+    for i in range(5):
+        truth = random.choice(TRUTHS)
 
         results.append(
             InlineQueryResultArticle(
-                id="start_" + secrets.token_hex(4),
-                title="🎮 START 1-ON-1 GAME",
-                description="Start a private Girl vs Boy game",
+                id=f"truth_{i}_{secrets.token_hex(4)}",
+                title="😈 TRUTH",
+                description=truth,
                 input_message_content=InputTextMessageContent(
-                    "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
-                    "Your game is ready!"
-                ),
-                reply_markup=InlineKeyboardMarkup([
-                    [
-                        InlineKeyboardButton(
-                            "🎮 OPEN GAME",
-                            url=(
-                                f"https://t.me/"
-                                f"{context.bot.username}"
-                                f"?start={code}"
-                            ),
-                        )
-                    ]
-                ]),
+                    f"😈 TRUTH\n\n{truth}"
+                )
             )
         )
 
-        for i in range(5):
-            if random.choice([True, False]):
-                question = random.choice(TRUTHS)
-                title = "😈 TRUTH"
-            else:
-                question = random.choice(DARES)
-                title = "🔥 DARE"
-
-            results.append(
-                InlineQueryResultArticle(
-                    id=f"{i}_{secrets.token_hex(4)}",
-                    title=title,
-                    description=question,
-                    input_message_content=InputTextMessageContent(
-                        f"{title}\n\n{question}"
-                    ),
-                )
-            )
-
-        await inline.answer(
-            results=results,
-            cache_time=0,
-            is_personal=True,
-            switch_pm_text="🎮 START 1-ON-1 GAME",
-            switch_pm_parameter=code,
-        )
-
-        return
-
-    if "truth" in query:
-        for i in range(10):
-            question = random.choice(TRUTHS)
-
-            results.append(
-                InlineQueryResultArticle(
-                    id=f"truth_{i}_{secrets.token_hex(4)}",
-                    title="😈 TRUTH",
-                    description=question,
-                    input_message_content=InputTextMessageContent(
-                        f"😈 TRUTH\n\n{question}"
-                    ),
-                )
-            )
-
-    elif "dare" in query:
-        for i in range(10):
-            question = random.choice(DARES)
-
-            results.append(
-                InlineQueryResultArticle(
-                    id=f"dare_{i}_{secrets.token_hex(4)}",
-                    title="🔥 DARE",
-                    description=question,
-                    input_message_content=InputTextMessageContent(
-                        f"🔥 DARE\n\n{question}"
-                    ),
-                )
-            )
-
-    else:
-        for i in range(10):
-            if random.choice([True, False]):
-                question = random.choice(TRUTHS)
-                title = "😈 TRUTH"
-            else:
-                question = random.choice(DARES)
-                title = "🔥 DARE"
-
-            results.append(
-                InlineQueryResultArticle(
-                    id=f"mix_{i}_{secrets.token_hex(4)}",
-                    title=title,
-                    description=question,
-                    input_message_content=InputTextMessageContent(
-                        f"{title}\n\n{question}"
-                    ),
-                )
-            )
-
-    await inline.answer(
+    await query.answer(
         results=results,
         cache_time=0,
-        is_personal=True,
+        is_personal=True
     )
-
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
