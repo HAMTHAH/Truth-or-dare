@@ -29,94 +29,95 @@ TRUTHS = [
     "What is your favorite physical feature of mine?",
     "If I told you I was outside your house right now, how would you get ready to meet me?",
     "What's the dirtiest thought you've had about me today?",
-    "What's a secret fantasy you've never told anyone?",
-    "Do you prefer spicy photos or flirty voice notes?",
-    "What's the most adventurous thing you've ever done in public?",
-    "If we were stuck in an elevator for 20 minutes, what would you want to happen?",
-    "What's the most intense attraction you've ever felt toward someone?",
-    "What's your favorite romantic accessory or outfit?",
-    "Describe exactly how it feels when someone kisses your neck.",
-    "What's the most daring romantic thing you've ever wanted to try?",
-    "Have you ever imagined someone you liked while watching a romantic scene?",
-    "What part of your personality gets the most attention from someone you like?",
-    "What's the most distracting thought you've had about me?",
-    "Do you prefer being in control or letting the other person take the lead?",
-    "What's your favorite outfit for a date?",
-    "What's the fastest someone has ever made you blush through text?",
-    "If you could choose one outfit for me to wear, what would it be?",
-    "What word or phrase instantly makes you blush?",
-    "Have you ever taken a flirty photo and been too shy to send it?",
-    "What's your favorite kind of romantic chemistry?",
-    "Do you prefer playful flirting or serious romantic talk?",
-    "What's the most embarrassing thing you've done while flirting?",
-    "If we had 24 hours together with no phones, what would we do?",
-    "When did you first realize you were attracted to me?",
-    "Do you prefer slow and romantic or spontaneous and playful?",
-    "What's your guilty pleasure when it comes to romance?",
-    "What's the sexiest compliment you've ever received?",
-    "What's the riskiest place you've ever flirted with someone?",
-    "What is one thing I do that makes you lose your composure?",
-    "What's the most daring thing you've ever done for a dare?",
-    "What's the best way for someone to wake you up on a date trip?",
+    "Have you ever imagined us going on a romantic trip together?",
+    "What is something you've wanted to tell me but never had the courage to?",
+    "What is the most attractive thing about me?",
+    "Have you ever reread our old messages?",
+    "What's one thing I do that instantly gets your attention?",
+    "Have you ever smiled at your phone because of me?",
+    "What is your favorite memory involving me?",
+    "If we were alone together for a whole day, what would you want to do?",
+    "What's something about me you find impossible to ignore?",
+    "Have you ever gotten jealous because of me?",
+    "What's the boldest thing you'd do on a date with me?",
+    "What kind of compliment from me would make your whole day?",
+    "What is one secret you've been keeping from me?",
+    "Have you ever had a crush on someone you shouldn't have?",
+    "What's the most embarrassing thing you've done because you liked someone?",
+    "What is your biggest weakness when it comes to flirting?",
+    "Do you prefer someone making the first move or making you make it?",
+    "What's your favorite kind of romantic attention?",
+    "What's something that instantly makes someone attractive to you?",
+    "Have you ever pretended not to like someone when you actually did?",
+    "What is the sweetest thing someone has ever done for you?",
+    "What's one thing you would change about our relationship?",
+    "What's something you've always wanted to try on a romantic date?",
     "What kind of romantic roleplay would you find fun?",
-    "If I gave you 10 minutes to impress me, what would you do?",
-    "What's a physical sensation you really enjoy?",
-    "Do you prefer gentle affection or intense flirting?",
-    "What's the first thing you would do when we meet again?",
-    "On a scale of 1–10, how much do you want to see me right now?",
+    "Do you prefer spicy photos or flirty voice notes?",
+    "What's the most attractive thing someone can whisper to you?",
+    "Have you ever imagined kissing someone while talking to them?",
+    "What kind of date would make you fall for someone?",
+    "What's one thing that can instantly make you nervous around someone?",
+    "Have you ever flirted with someone just for fun?",
+    "What's the most romantic place you'd want to kiss someone?",
+    "What is your biggest turn-on when it comes to personality?",
+    "What's a secret fantasy you've never told anyone?",
+    "What kind of outfit do you find most attractive?",
+    "What's the longest you've ever had a crush on someone?",
+    "What is one thing you would love to hear from me right now?",
 ]
 
 DARES = [
-    "Send a voice note saying your smoothest pickup line.",
-    "Give the other player a dangerously cute nickname.",
-    "Send three emojis that describe your attraction to them.",
-    "Write a compliment that would instantly make them blush.",
-    "Send a voice note saying, 'You're seriously distracting me.'",
-    "Describe your perfect date in exactly five words.",
-    "Tell the other player the first thing you noticed about them.",
-    "Send a mysterious message that makes them curious about you.",
-    "Write a two-line romantic poem about them.",
-    "Pretend you're asking them on a first date.",
-    "Send your smoothest compliment without using the word 'beautiful.'",
-    "Describe your dream date entirely with emojis.",
-    "Send a dramatic 'I miss you' message.",
-    "Write a message you'd normally be too shy to send.",
-    "Pretend you're jealous and explain why.",
-    "Send five different heart emojis and explain your favorite one.",
-    "Tell them one thing about them that you find irresistible.",
-    "Write a fake romantic confession.",
-    "Send a voice note saying something sweet in your best romantic voice.",
-    "Describe your ideal romantic evening together.",
-    "Give your best romantic one-liner.",
-    "Write a three-word confession.",
-    "Describe the other player as if they're the main character in a romance movie.",
-    "Pretend you're trying to impress them at a party.",
-    "Give them a compliment using exactly five words.",
-    "Write the opening scene of a romance movie starring both of you.",
-    "Tell them one thing you'd want to do together on a perfect date.",
-    "Start a message with: 'Don't get used to this, but...'",
-    "Give the other player a playful challenge.",
-    "Send a combination of three emojis that secretly describes your mood.",
-    "Tell them something about their personality that you find attractive.",
+    "Send a voice note saying something dangerously flirty.",
+    "Give the other player a ridiculously cute nickname.",
+    "Send your best flirty selfie.",
+    "Write a three-line romantic poem about the other player.",
+    "Tell the other player three things you find attractive about them.",
+    "Send a voice note saying their name in your most charming voice.",
+    "Describe your perfect date with the other player.",
+    "Send a message that would make the other player blush.",
+    "Give the other player your best pickup line.",
+    "Pretend you're asking the other player on a first date.",
+    "Write a cheesy romantic confession.",
+    "Send a voice note pretending you're nervous because you like them.",
+    "Give the other player a compliment without using the words beautiful, cute, or attractive.",
+    "Describe the other player using only five words.",
+    "Tell the other player what their ideal romantic nickname should be.",
+    "Send a voice note saying 'I miss you' dramatically.",
+    "Write a fake romantic movie scene starring you two.",
+    "Tell the other player what your first impression of them was.",
+    "Give the other player a ridiculous but romantic proposal.",
+    "Send three emojis that describe your feelings toward the other player.",
+    "Tell the other player what song reminds you of them.",
+    "Write a flirty text that starts with 'I probably shouldn't tell you this, but...'",
+    "Pretend you are jealous and send a dramatic message.",
+    "Give the other player your most creative compliment.",
+    "Describe what your dream evening together would look like.",
+    "Send a voice note saying something sweet without laughing.",
+    "Write a romantic message using only emojis.",
+    "Tell the other player why they would be difficult to forget.",
+    "Make up a secret code word that means 'I want your attention.'",
+    "Send the other player a message that starts with 'Confession:'",
+    "Describe your perfect hug.",
+    "Give the other player a new nickname and explain it.",
+    "Pretend you're texting them after the best date of your life.",
+    "Write a short love letter in exactly five sentences.",
+    "Tell the other player what you would notice first if they walked into a room.",
+    "Send a voice note saying the sweetest thing you can think of.",
+    "Create a romantic couple name for you two.",
+    "Tell the other player something you've never complimented them on before.",
+    "Write a flirty message without using the word 'love'.",
+    "Pretend you're trying to convince the other player to go on a date with you.",
+    "Give the other player a rating out of 10 and explain your score.",
+    "Describe their personality using three romantic comparisons.",
+    "Send a message that would make someone think you're secretly in love.",
+    "Tell the other player one thing you hope happens between you two someday.",
+    "Write a dramatic 'goodnight' message as if you're completely obsessed with them.",
+    "Send your best innocent-but-flirty pickup line.",
+    "Tell the other player what kind of date outfit you would wear.",
     "Pretend you're meeting them for the first time and flirt with them.",
-    "Write a fake proposal in one sentence.",
-    "Give them a nickname that only you would use.",
-    "Send a voice note saying, 'I think you're trouble.'",
-    "Describe your dream relationship in three sentences.",
-    "Send a message designed specifically to make them blush.",
-    "Tell them your first impression of them.",
-    "Write a dramatic fake breakup message, then end it with 'Just kidding.'",
-    "Give the other player your smoothest compliment.",
-    "Pretend you're their secret admirer and leave them a mysterious message.",
-    "Describe your perfect partner in exactly five words.",
-    "Send a playful confession beginning with 'Okay, I'll admit it...'",
-    "Tell them what quality makes someone irresistible to you.",
-    "Write a romantic text without using the words 'love' or 'like.'",
-    "Rate their flirting from 1 to 10 and explain your score.",
-    "Pretend you're trying to win them over in 30 seconds.",
-    "Send a voice note saying their name in your most dramatic voice.",
-    "Finish this sentence: 'If we went on a date tonight, I would...'",
-    "End your next message with: '...and that's why you're dangerous.'",
+    "Send a voice note saying their name three different ways.",
+    "Write the most cheesy romantic sentence you can think of.",
 ]
 
 # ============================================================
@@ -126,28 +127,70 @@ DARES = [
 games = {}
 
 
-def new_game():
+def create_game():
     code = secrets.token_hex(5)
 
     games[code] = {
-        "girl": None,
-        "boy": None,
-        "active": False,
-        "turn_role": None,
-        "turn_user_id": None,
+        "player1": None,
+        "player2": None,
+
+        # Player whose challenge is currently active.
+        "turn": None,
+
         "round": 0,
-        "current_type": None,
-        "current_question": None,
+
+        # Current challenge information
+        "challenge_type": None,
+        "challenge": None,
+
+        "active": False,
     }
 
     return code
 
 
 # ============================================================
-# BUTTONS FOR NEW PANELS
+# HELPERS
 # ============================================================
 
-def next_buttons(code):
+def player_name(game, player_number):
+    player = game[player_number]
+
+    if not player:
+        return "Waiting..."
+
+    return player["name"]
+
+
+def get_player_number(game, user_id):
+    if game["player1"] and game["player1"]["id"] == user_id:
+        return "player1"
+
+    if game["player2"] and game["player2"]["id"] == user_id:
+        return "player2"
+
+    return None
+
+
+def other_player(player):
+    if player == "player1":
+        return "player2"
+
+    return "player1"
+
+
+def turn_name(game):
+    if game["turn"] == "player1":
+        return player_name(game, "player1")
+
+    return player_name(game, "player2")
+
+
+# ============================================================
+# BUTTONS
+# ============================================================
+
+def challenge_buttons(code):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
@@ -180,51 +223,57 @@ def answer_button(code):
 
 
 # ============================================================
-# INLINE QUERY
+# /START
+# ============================================================
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+    await update.message.reply_text(
+        "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
+        "Open a private chat and type:\n\n"
+        "@NAUGHTYDARE_bot\n\n"
+        "Then choose START 1-ON-1 GAME."
+    )
+
+
+# ============================================================
+# INLINE MODE
 # ============================================================
 
 async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    q = update.inline_query.query.strip()
-
-    print("INLINE:", q)
+    query = update.inline_query
+    q = query.query.strip()
 
     # --------------------------------------------------------
-    # CREATE GAME
+    # START GAME
     # --------------------------------------------------------
 
     if not q:
 
-        code = new_game()
-        game = games[code]
-
-        keyboard = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(
-                    "👩 GIRL",
-                    callback_data=f"role:g:{code}",
-                ),
-                InlineKeyboardButton(
-                    "👨 BOY",
-                    callback_data=f"role:b:{code}",
-                ),
-            ]
-        ])
+        code = create_game()
 
         result = InlineQueryResultArticle(
-            id=f"game_{code}",
+            id=f"lobby_{code}",
             title="🎮 START 1-ON-1 GAME",
-            description="Play directly inside this private chat",
+            description="Start a private Truth or Dare game",
             input_message_content=InputTextMessageContent(
                 "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
-                "👩 Girl: Waiting...\n"
-                "👨 Boy: Waiting...\n\n"
-                "Choose your role:"
+                "👤 Player 1: Waiting...\n"
+                "👤 Player 2: Waiting...\n\n"
+                "Tap JOIN GAME to enter."
             ),
-            reply_markup=keyboard,
+            reply_markup=InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton(
+                        "🎮 JOIN GAME",
+                        callback_data=f"join:{code}",
+                    )
+                ]
+            ]),
         )
 
-        await update.inline_query.answer(
+        await query.answer(
             [result],
             cache_time=0,
             is_personal=False,
@@ -233,30 +282,26 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # --------------------------------------------------------
-    # PARSE INLINE COMMAND
+    # PARSE QUERY
     # --------------------------------------------------------
 
     parts = q.split("|")
+
     action = parts[0]
 
     if len(parts) < 2:
-        await update.inline_query.answer(
-            [],
-            cache_time=0,
-        )
+        await query.answer([], cache_time=0)
         return
 
     code = parts[1]
+
     game = games.get(code)
 
     if not game:
-        await update.inline_query.answer(
-            [],
-            cache_time=0,
-        )
+        await query.answer([], cache_time=0)
         return
 
-    user = update.inline_query.from_user
+    user = query.from_user
 
     # --------------------------------------------------------
     # TRUTH / DARE / RANDOM
@@ -265,25 +310,27 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if action in ("truth", "dare", "random"):
 
         if not game["active"]:
-            await update.inline_query.answer(
-                [],
-                cache_time=0,
-            )
+            await query.answer([], cache_time=0)
             return
 
-        # Only current player can create the next panel.
-        if user.id != game["turn_user_id"]:
+        player = get_player_number(game, user.id)
+
+        # ----------------------------------------------------
+        # ONLY CURRENT PLAYER CAN CHOOSE
+        # ----------------------------------------------------
+
+        if player != game["turn"]:
 
             result = InlineQueryResultArticle(
-                id=f"not_turn_{secrets.token_hex(4)}",
+                id=f"wrongturn_{secrets.token_hex(5)}",
                 title="⏳ NOT YOUR TURN",
                 description="Wait for the other player.",
                 input_message_content=InputTextMessageContent(
-                    "⏳ It's not your turn yet."
+                    f"⏳ It's {turn_name(game)}'s turn."
                 ),
             )
 
-            await update.inline_query.answer(
+            await query.answer(
                 [result],
                 cache_time=0,
                 is_personal=True,
@@ -291,77 +338,73 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             return
 
-        # Pick challenge.
+        # ----------------------------------------------------
+        # SELECT CHALLENGE
+        #
+        # IMPORTANT:
+        # TURN DOES NOT CHANGE HERE.
+        # ----------------------------------------------------
+
         if action == "truth":
-            question = random.choice(TRUTHS)
+
+            challenge = random.choice(TRUTHS)
             challenge_type = "truth"
-            title = "😈 TRUTH"
 
         elif action == "dare":
-            question = random.choice(DARES)
+
+            challenge = random.choice(DARES)
             challenge_type = "dare"
-            title = "🔥 DARE"
 
         else:
+
             if random.choice([True, False]):
-                question = random.choice(TRUTHS)
+
+                challenge = random.choice(TRUTHS)
                 challenge_type = "truth"
-                title = "😈 TRUTH"
+
             else:
-                question = random.choice(DARES)
+
+                challenge = random.choice(DARES)
                 challenge_type = "dare"
-                title = "🔥 DARE"
 
-        # Advance round.
         game["round"] += 1
-        game["current_type"] = challenge_type
-        game["current_question"] = question
 
-        # Switch player for the NEW panel.
-        if game["turn_role"] == "girl":
-            game["turn_role"] = "boy"
+        game["challenge_type"] = challenge_type
+        game["challenge"] = challenge
+
+        current_player = game["turn"]
+
+        name = player_name(game, current_player)
+
+        if challenge_type == "truth":
+            title = "😈 TRUTH"
         else:
-            game["turn_role"] = "girl"
-
-        game["turn_user_id"] = game[
-            game["turn_role"]
-        ]["user_id"]
-
-        player = game[game["turn_role"]]
-
-        role_text = (
-            "👩 GIRL"
-            if game["turn_role"] == "girl"
-            else "👨 BOY"
-        )
+            title = "🔥 DARE"
 
         text = (
             f"🔥 ROUND {game['round']} 🔥\n\n"
-            f"🎯 {role_text}'S TURN\n"
-            f"👤 {player['name']}\n\n"
+            f"👤 {name}'S TURN\n\n"
             f"{title}\n\n"
-            f"{question}"
+            f"{challenge}"
         )
 
-        # Truth gets an answer button.
         if challenge_type == "truth":
             keyboard = answer_button(code)
         else:
-            # For dares, the player can immediately choose
-            # the next challenge after completing it.
-            keyboard = next_buttons(code)
+            # For a dare, the player completes it and then
+            # chooses the next challenge. The turn switches
+            # only when the next challenge is selected.
+            keyboard = challenge_buttons(code)
 
         result = InlineQueryResultArticle(
-            id=f"question_{code}_{secrets.token_hex(4)}",
-            title=f"{title} — ROUND {game['round']}",
-            description=question[:100],
-            input_message_content=InputTextMessageContent(
-                text
-            ),
+            id=f"challenge_{code}_{secrets.token_hex(5)}",
+            title=f"{title} — {name}",
+            description=challenge[:100],
+            input_message_content=InputTextMessageContent(text),
             reply_markup=keyboard,
         )
 
-        await update.inline_query.answer(
+        await query.answer(
             [result],
             cache_time=0,
             is_personal=False,
@@ -369,29 +412,34 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # --------------------------------------------------------
+    # ========================================================
     # ANSWER
-    # --------------------------------------------------------
+    # ========================================================
 
     if action == "answer":
 
         if len(parts) < 3:
+            await query.answer([], cache_time=0)
             return
 
         answer = parts[2].strip()
 
+        # ----------------------------------------------------
+        # ASK USER TO TYPE ANSWER
+        # ----------------------------------------------------
+
         if not answer:
 
             result = InlineQueryResultArticle(
-                id=f"type_{secrets.token_hex(4)}",
+                id=f"typeanswer_{secrets.token_hex(5)}",
                 title="✍️ TYPE YOUR ANSWER",
-                description="Write your answer after the bot username.",
+                description="Type your answer after @NAUGHTYDARE_bot",
                 input_message_content=InputTextMessageContent(
                     "✍️ Type your answer after @NAUGHTYDARE_bot."
                 ),
             )
 
-            await update.inline_query.answer(
+            await query.answer(
                 [result],
                 cache_time=0,
                 is_personal=True,
@@ -400,21 +448,27 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         if not game["active"]:
+            await query.answer([], cache_time=0)
             return
 
-        # Only current player can answer.
-        if user.id != game["turn_user_id"]:
+        player = get_player_number(game, user.id)
+
+        # ----------------------------------------------------
+        # ONLY CURRENT PLAYER CAN ANSWER
+        # ----------------------------------------------------
+
+        if player != game["turn"]:
 
             result = InlineQueryResultArticle(
-                id=f"wrong_{secrets.token_hex(4)}",
+                id=f"wronganswer_{secrets.token_hex(5)}",
                 title="⏳ NOT YOUR TURN",
                 description="Wait for the other player.",
                 input_message_content=InputTextMessageContent(
-                    "⏳ It's not your turn yet."
+                    f"⏳ It's {turn_name(game)}'s turn."
                 ),
             )
 
-            await update.inline_query.answer(
+            await query.answer(
                 [result],
                 cache_time=0,
                 is_personal=True,
@@ -424,50 +478,58 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         answer = answer[:1000]
 
+        name = player_name(game, player)
+
+        # ----------------------------------------------------
+        # ANSWER COMPLETED
+        # ----------------------------------------------------
+
+        next_player = other_player(player)
+
+        # NOW the turn changes.
+        game["turn"] = next_player
+
         text = (
-            f"📝 {user.first_name}'s ANSWER\n\n"
+            f"📝 {name}'S ANSWER\n\n"
             f"{answer}\n\n"
-            "🔥 Ready for the next round?"
+            f"✅ Challenge completed!\n\n"
+            f"🎯 Next turn: {player_name(game, next_player)}"
         )
 
         result = InlineQueryResultArticle(
-            id=f"answer_{code}_{secrets.token_hex(4)}",
+            id=f"answer_{code}_{secrets.token_hex(5)}",
             title="📨 SEND ANSWER",
             description=answer[:100],
-            input_message_content=InputTextMessageContent(
-                text
-            ),
-            reply_markup=next_buttons(code),
+            input_message_content=InputTextMessageContent(text),
+            reply_markup=challenge_buttons(code),
         )
 
-        await update.inline_query.answer(
+        await query.answer(
             [result],
             cache_time=0,
-            is_personal=True,
+            is_personal=False,
         )
 
         return
 
-    await update.inline_query.answer(
-        [],
-        cache_time=0,
-    )
+    await query.answer([], cache_time=0)
 
 
 # ============================================================
-# ROLE BUTTONS
+# CALLBACKS
 # ============================================================
 
 async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     query = update.callback_query
-    await query.answer()
 
     data = query.data
+
     parts = data.split(":")
 
     action = parts[0]
-    code = parts[-1]
+
+    code = parts[1]
 
     game = games.get(code)
 
@@ -480,110 +542,114 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     user = query.from_user
 
-    # --------------------------------------------------------
-    # ROLE
-    # --------------------------------------------------------
+    # ========================================================
+    # JOIN GAME
+    # ========================================================
 
-    if action == "role":
+    if action == "join":
 
-        role_code = parts[1]
+        # ----------------------------------------------------
+        # PLAYER 1
+        # ----------------------------------------------------
 
-        role = (
-            "girl"
-            if role_code == "g"
-            else "boy"
-        )
+        if not game["player1"]:
 
-        # Check if user already joined.
-        for r in ("girl", "boy"):
-
-            if (
-                game[r]
-                and game[r]["user_id"] == user.id
-            ):
-                await query.answer(
-                    "You already chose a role.",
-                    show_alert=True,
-                )
-                return
-
-        if game[role]:
+            game["player1"] = {
+                "id": user.id,
+                "name": user.first_name,
+            }
 
             await query.answer(
-                "❌ That role is already taken.",
+                "✅ You are Player 1!"
+            )
+
+        # ----------------------------------------------------
+        # PLAYER 2
+        # ----------------------------------------------------
+
+        elif (
+            game["player1"]["id"] != user.id
+            and not game["player2"]
+        ):
+
+            game["player2"] = {
+                "id": user.id,
+                "name": user.first_name,
+            }
+
+            await query.answer(
+                "✅ You are Player 2!"
+            )
+
+        # ----------------------------------------------------
+        # ALREADY JOINED
+        # ----------------------------------------------------
+
+        elif (
+            game["player1"]["id"] == user.id
+            or (
+                game["player2"]
+                and game["player2"]["id"] == user.id
+            )
+        ):
+
+            await query.answer(
+                "You're already in this game."
+            )
+
+        else:
+
+            await query.answer(
+                "❌ This game already has two players.",
                 show_alert=True,
             )
+
             return
 
-        game[role] = {
-            "user_id": user.id,
-            "name": user.first_name,
-        }
+        # ----------------------------------------------------
+        # BOTH PLAYERS READY
+        # ----------------------------------------------------
 
-        # Only edit the lobby during joining.
-        if game["girl"] and game["boy"]:
+        if game["player1"] and game["player2"]:
 
             keyboard = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
-                        "🎮 START GAME",
-                        callback_data=f"begin:{code}",
+                        "🔥 START GAME",
+                        callback_data=f"start:{code}",
                     )
                 ]
             ])
 
             text = (
-                "🔥 BOTH PLAYERS ARE READY! 🔥\n\n"
-                f"👩 Girl: {game['girl']['name']}\n"
-                f"👨 Boy: {game['boy']['name']}\n\n"
+                "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
+                f"👤 Player 1: "
+                f"{player_name(game, 'player1')}\n"
+                f"👤 Player 2: "
+                f"{player_name(game, 'player2')}\n\n"
+                "✅ Both players joined!\n\n"
                 "Press START GAME."
             )
 
         else:
 
-            girl = (
-                f"👩 Girl: {game['girl']['name']}"
-                if game["girl"]
-                else "👩 Girl: Waiting..."
-            )
-
-            boy = (
-                f"👨 Boy: {game['boy']['name']}"
-                if game["boy"]
-                else "👨 Boy: Waiting..."
+            text = (
+                "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
+                f"👤 Player 1: "
+                f"{player_name(game, 'player1')}\n"
+                f"👤 Player 2: "
+                f"{player_name(game, 'player2')}\n\n"
+                "Waiting for another player..."
             )
 
             keyboard = InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
-                        "👩 GIRL"
-                        if not game["girl"]
-                        else "👩 GIRL — TAKEN",
-                        callback_data=(
-                            f"role:g:{code}"
-                            if not game["girl"]
-                            else f"taken:{code}"
-                        ),
-                    ),
-                    InlineKeyboardButton(
-                        "👨 BOY"
-                        if not game["boy"]
-                        else "👨 BOY — TAKEN",
-                        callback_data=(
-                            f"role:b:{code}"
-                            if not game["boy"]
-                            else f"taken:{code}"
-                        ),
-                    ),
+                        "🎮 JOIN GAME",
+                        callback_data=f"join:{code}",
+                    )
                 ]
             ])
-
-            text = (
-                "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
-                f"{girl}\n"
-                f"{boy}\n\n"
-                "Choose your role:"
-            )
 
         if query.inline_message_id:
 
@@ -595,26 +661,13 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    # --------------------------------------------------------
-    # TAKEN
-    # --------------------------------------------------------
-
-    if action == "taken":
-
-        await query.answer(
-            "❌ That role is already taken.",
-            show_alert=True,
-        )
-
-        return
-
-    # --------------------------------------------------------
+    # ========================================================
     # START GAME
-    # --------------------------------------------------------
+    # ========================================================
 
-    if action == "begin":
+    if action == "start":
 
-        if not game["girl"] or not game["boy"]:
+        if not game["player1"] or not game["player2"]:
 
             await query.answer(
                 "Both players must join first.",
@@ -623,53 +676,35 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             return
 
+        # ----------------------------------------------------
+        # LOCK GAME
+        # ----------------------------------------------------
+
         game["active"] = True
-        game["round"] = 1
 
-        game["turn_role"] = random.choice(
-            ["girl", "boy"]
-        )
+        game["round"] = 0
 
-        game["turn_user_id"] = game[
-            game["turn_role"]
-        ]["user_id"]
+        # ----------------------------------------------------
+        # PLAYER 1 ALWAYS STARTS
+        # ----------------------------------------------------
 
-        # The first question is displayed by
-        # switching the user into inline mode.
-        #
-        # This button stays in the same chat.
-        keyboard = InlineKeyboardMarkup([
-            [
-                InlineKeyboardButton(
-                    "😈 TRUTH",
-                    switch_inline_query_current_chat=f"truth|{code}",
-                ),
-                InlineKeyboardButton(
-                    "🔥 DARE",
-                    switch_inline_query_current_chat=f"dare|{code}",
-                ),
-            ],
-            [
-                InlineKeyboardButton(
-                    "🎲 RANDOM",
-                    switch_inline_query_current_chat=f"random|{code}",
-                )
-            ],
-        ])
+        game["turn"] = "player1"
 
-        player = game[game["turn_role"]]
-
-        role_text = (
-            "👩 GIRL"
-            if game["turn_role"] == "girl"
-            else "👨 BOY"
+        first_player = player_name(
+            game,
+            "player1",
         )
 
         text = (
             "🔥 GAME STARTED! 🔥\n\n"
-            f"🎯 {role_text}'S TURN\n"
-            f"👤 {player['name']}\n\n"
-            "Choose a challenge:"
+            f"🎯 {first_player}'S TURN\n\n"
+            "Choose your challenge:"
+        )
+
+        keyboard = challenge_buttons(code)
+
+        await query.answer(
+            "🔥 Player 1 starts!"
         )
 
         if query.inline_message_id:
@@ -690,6 +725,7 @@ async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def main():
 
     if not BOT_TOKEN:
+
         raise RuntimeError(
             "BOT_TOKEN environment variable is missing."
         )
@@ -710,7 +746,7 @@ def main():
     )
 
     print(
-        "🔥 NAUGHTYDARE INLINE GAME RUNNING 🔥"
+        "🔥 NAUGHTYDARE BOT RUNNING 🔥"
     )
 
     app.run_polling()
