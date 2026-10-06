@@ -1,5 +1,6 @@
 import os
 import random
+import secrets
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
@@ -66,56 +67,56 @@ TRUTHS = [
 ]
 
 DARES = [
-    "Give someone in the game your best pickup line.",
-    "Send a cute selfie to someone you trust.",
-    "Give another player a genuine compliment.",
-    "Send someone: 'Be honest... would you date me? 👀'",
+    "Give your partner your best pickup line.",
+    "Send your partner a cute selfie.",
+    "Give your partner a genuine compliment.",
+    "Tell your partner: 'Be honest... would you date me? 👀'",
     "Describe your ideal partner without saying their name.",
-    "Send a flirty emoji to someone you secretly like.",
-    "Give someone a rating out of 10 for their flirting skills.",
+    "Send your partner your favorite flirty emoji combination.",
+    "Give your partner a rating out of 10 for their flirting skills.",
     "Send a voice message saying your best pickup line.",
-    "Tell the group your first impression of your crush.",
+    "Tell your partner your first impression of them.",
     "Change your profile picture to your best dressed-up photo for 10 minutes.",
-    "Write a cheesy romantic message and send it to the group.",
-    "Tell someone what you find most attractive about their personality.",
-    "Send someone: 'I have a question for you 👀'",
-    "Give another player a ridiculous romantic nickname.",
+    "Write a cheesy romantic message for your partner.",
+    "Tell your partner what you find most attractive about their personality.",
+    "Send your partner: 'I have a question for you 👀'",
+    "Give your partner a ridiculous romantic nickname.",
     "Describe your perfect date in three sentences.",
-    "Send your best non-explicit selfie to the group.",
-    "Give someone your best celebrity-style introduction.",
-    "Tell the group what your dream partner looks like.",
-    "Write a pickup line using another player's name.",
-    "Send a heart emoji to the person you think has the best smile.",
-    "Tell someone one thing that makes them attractive.",
+    "Send your best non-explicit selfie to your partner.",
+    "Give your partner your best celebrity-style introduction.",
+    "Tell your partner what your dream partner looks like.",
+    "Write a pickup line using your partner's name.",
+    "Send your partner three heart emojis.",
+    "Tell your partner one thing that makes them attractive.",
     "Record a 5-second voice message saying 'I think you're cute.'",
-    "Let another player choose your status for 10 minutes.",
-    "Give someone a dramatic compliment like you're in a romance movie.",
-    "Tell the group your most embarrassing crush story.",
+    "Let your partner choose your status for 10 minutes.",
+    "Give your partner a dramatic compliment like you're in a romance movie.",
+    "Tell your partner your most embarrassing crush story.",
     "Send a selfie making your best confident expression.",
-    "Give someone your best first-date invitation.",
-    "Tell another player what your ideal first date would be.",
-    "Send a message saying 'We need to talk 👀' to a friend, then reveal it's a dare.",
-    "Give another player a rating for their sense of humor.",
-    "Say three things you find attractive in a person.",
-    "Send your favorite romantic emoji combination.",
-    "Give someone a compliment without mentioning appearance.",
-    "Pretend to propose to another player for 10 seconds.",
+    "Give your partner your best first-date invitation.",
+    "Tell your partner what your ideal first date with them would be.",
+    "Send your partner: 'We need to talk 👀' and then reveal it's a dare.",
+    "Give your partner a rating for their sense of humor.",
+    "Tell your partner three things you find attractive in a person.",
+    "Send your partner your favorite romantic emoji combination.",
+    "Give your partner a compliment without mentioning appearance.",
+    "Pretend to propose to your partner for 10 seconds.",
     "Create a fake dating-app bio for yourself.",
-    "Send a voice message introducing yourself as someone's future date.",
-    "Tell the group your most attractive quality.",
-    "Give someone a cheesy movie-style compliment.",
-    "Send someone: 'Quick question... what's your type? 👀'",
-    "Let another player choose one harmless emoji for your next five messages.",
+    "Send a voice message introducing yourself as your partner's future date.",
+    "Tell your partner your most attractive quality.",
+    "Give your partner a cheesy movie-style compliment.",
+    "Send your partner: 'Quick question... what's your type? 👀'",
+    "Let your partner choose one harmless emoji for your next five messages.",
     "Describe your perfect partner using only five words.",
-    "Give someone a playful compliment.",
-    "Tell the group what would instantly make you interested in someone.",
-    "Send a selfie with your best smile.",
-    "Give someone a fake award for having the best personality.",
-    "Tell another player their best quality.",
-    "Make up a romantic movie title about you and your crush.",
+    "Give your partner a playful compliment.",
+    "Tell your partner what would instantly make you interested in someone.",
+    "Send your partner a selfie with your best smile.",
+    "Give your partner a fake award for having the best personality.",
+    "Tell your partner their best quality.",
+    "Make up a romantic movie title about the two of you.",
     "Send a voice message saying your most dramatic love confession.",
-    "Tell the group your dream date activity.",
-    "Choose someone and give them your best harmless flirting attempt.",
+    "Tell your partner your dream date activity.",
+    "Give your partner your best harmless flirting attempt.",
 ]
 
 # ============================================================
@@ -125,137 +126,197 @@ DARES = [
 games = {}
 
 
-def get_game(chat_id):
-    if chat_id not in games:
-        games[chat_id] = {
-            "players": [],
-            "current_player": None,
-            "started": False,
-        }
+def create_game():
+    code = secrets.token_urlsafe(6)
 
-    return games[chat_id]
+    games[code] = {
+        "girl": None,
+        "boy": None,
+        "turn": None,
+        "round": 0,
+        "active": False,
+    }
+
+    return code
 
 
 # ============================================================
-# MAIN GAME PANEL
+# MAIN MENU
 # ============================================================
 
-def main_panel(chat_id):
+def main_menu():
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "🎮 CREATE GAME",
+                callback_data="create"
+            )
+        ]
+    ])
 
-    game = get_game(chat_id)
-    players = game["players"]
 
-    if players:
-        player_text = "\n".join(
-            f"• {p['name']}" for p in players
-        )
+# ============================================================
+# ROLE SELECTION
+# ============================================================
+
+def role_keyboard(code):
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "👩 GIRL",
+                callback_data=f"role:g:{code}"
+            ),
+            InlineKeyboardButton(
+                "👨 BOY",
+                callback_data=f"role:b:{code}"
+            ),
+        ]
+    ])
+
+
+# ============================================================
+# GAME PANEL
+# ============================================================
+
+def game_panel(code):
+
+    game = games[code]
+
+    girl = game["girl"]
+    boy = game["boy"]
+
+    girl_name = girl["name"] if girl else "Waiting..."
+    boy_name = boy["name"] if boy else "Waiting..."
+
+    if girl and boy:
+        status = "🟢 READY TO PLAY"
     else:
-        player_text = "No players yet."
+        status = "🟡 WAITING FOR PLAYERS"
 
-    status = "🟢 Game ready" if len(players) >= 2 else "🟡 Waiting for players"
-
-    text = (
-        "🔥 *TRUTH OR DARE* 🔥\n\n"
+    return (
+        "🔥 *PRIVATE TRUTH OR DARE* 🔥\n\n"
         f"{status}\n\n"
-        f"👥 *Players ({len(players)}):*\n"
-        f"{player_text}\n\n"
-        "Join the game and wait for everyone to be ready!"
+        f"👩 Girl: *{girl_name}*\n"
+        f"👨 Boy: *{boy_name}*\n\n"
+        "Only two players can join this game.\n"
+        "Choose your role below."
     )
 
-    keyboard = [
-        [
-            InlineKeyboardButton("👥 JOIN", callback_data="join"),
-            InlineKeyboardButton("🚪 LEAVE", callback_data="leave"),
-        ],
-        [
-            InlineKeyboardButton("🎮 START GAME", callback_data="start_game"),
-        ],
-        [
-            InlineKeyboardButton("🔄 REFRESH", callback_data="panel"),
-        ],
-    ]
 
-    return text, InlineKeyboardMarkup(keyboard)
+def game_keyboard(code):
+
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(
+                "👩 GIRL",
+                callback_data=f"role:g:{code}"
+            ),
+            InlineKeyboardButton(
+                "👨 BOY",
+                callback_data=f"role:b:{code}"
+            ),
+        ],
+        [
+            InlineKeyboardButton(
+                "🎮 START",
+                callback_data=f"begin:{code}"
+            )
+        ]
+    ])
 
 
 # ============================================================
-# CHALLENGE PANEL
+# CHALLENGE BUTTONS
 # ============================================================
 
-def challenge_panel():
+def challenge_keyboard(code):
 
-    keyboard = [
+    return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("🔄 NEXT", callback_data="next"),
-            InlineKeyboardButton("😈 TRUTH", callback_data="truth"),
+            InlineKeyboardButton(
+                "😈 TRUTH",
+                callback_data=f"truth:{code}"
+            ),
+            InlineKeyboardButton(
+                "🔥 DARE",
+                callback_data=f"dare:{code}"
+            ),
         ],
         [
-            InlineKeyboardButton("🔥 DARE", callback_data="dare"),
-            InlineKeyboardButton("🎲 RANDOM", callback_data="random"),
+            InlineKeyboardButton(
+                "🎲 RANDOM",
+                callback_data=f"random:{code}"
+            ),
+            InlineKeyboardButton(
+                "🔄 NEXT",
+                callback_data=f"next:{code}"
+            ),
         ],
         [
-            InlineKeyboardButton("✅ DONE", callback_data="done"),
-            InlineKeyboardButton("🏠 GAME PANEL", callback_data="panel"),
+            InlineKeyboardButton(
+                "✅ DONE",
+                callback_data=f"done:{code}"
+            )
         ],
-    ]
-
-    return InlineKeyboardMarkup(keyboard)
+    ])
 
 
 # ============================================================
-# START COMMAND
+# START
 # ============================================================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    chat_id = update.effective_chat.id
-
-    text, keyboard = main_panel(chat_id)
-
     await update.message.reply_text(
-        text,
+        "🔥 *PRIVATE TRUTH OR DARE* 🔥\n\n"
+        "Create a private 1-on-1 game and invite another player.\n\n"
+        "👩 Girl vs 👨 Boy\n"
+        "😈 Truth\n"
+        "🔥 Dare\n"
+        "🎲 Random challenges\n"
+        "🔄 Automatic turns",
         parse_mode="Markdown",
-        reply_markup=keyboard,
+        reply_markup=main_menu(),
     )
 
 
 # ============================================================
-# SEND NEW CHALLENGE
+# SEND CHALLENGE
 # ============================================================
 
-async def send_challenge(query, challenge_type="random"):
+async def send_challenge(query, code, challenge_type="random"):
 
-    chat_id = query.message.chat_id
-    game = get_game(chat_id)
-
-    if not game["players"]:
+    if code not in games:
         await query.answer(
-            "Nobody has joined the game yet!",
-            show_alert=True,
+            "This game no longer exists.",
+            show_alert=True
         )
         return
 
-    # Choose player
-    if game["current_player"] is None:
-        player = random.choice(game["players"])
-    else:
-        current_index = next(
-            (
-                i for i, p in enumerate(game["players"])
-                if p["id"] == game["current_player"]
-            ),
-            -1,
+    game = games[code]
+
+    if not game["girl"] or not game["boy"]:
+        await query.answer(
+            "Both players must join first!",
+            show_alert=True
         )
+        return
 
-        if current_index == -1:
-            player = random.choice(game["players"])
+    # Determine whose turn it is
+    if game["turn"] is None:
+        player = random.choice([
+            game["girl"],
+            game["boy"]
+        ])
+    else:
+        if game["turn"] == "girl":
+            player = game["boy"]
         else:
-            next_index = (current_index + 1) % len(game["players"])
-            player = game["players"][next_index]
+            player = game["girl"]
 
-    game["current_player"] = player["id"]
+    game["turn"] = player["role"]
+    game["round"] += 1
 
-    # Choose challenge
     if challenge_type == "truth":
         challenge = random.choice(TRUTHS)
         title = "😈 TRUTH"
@@ -272,17 +333,20 @@ async def send_challenge(query, challenge_type="random"):
             challenge = random.choice(DARES)
             title = "🔥 DARE"
 
+    role_icon = "👩" if player["role"] == "girl" else "👨"
+
     text = (
-        f"{title}\n\n"
-        f"👤 *{player['name']}'s turn!*\n\n"
+        f"🔥 *ROUND {game['round']}* 🔥\n\n"
+        f"{role_icon} *{player['name']}'s turn!*\n\n"
+        f"*{title}*\n\n"
         f"🎯 {challenge}\n\n"
-        "Choose an action below:"
+        "Complete the challenge, then press DONE."
     )
 
     await query.message.reply_text(
         text,
         parse_mode="Markdown",
-        reply_markup=challenge_panel(),
+        reply_markup=challenge_keyboard(code),
     )
 
 
@@ -295,89 +359,80 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    chat_id = query.message.chat_id
+    data = query.data
     user = query.from_user
-    game = get_game(chat_id)
 
     # --------------------------------------------------------
-    # MAIN PANEL
+    # CREATE GAME
     # --------------------------------------------------------
 
-    if query.data == "panel":
+    if data == "create":
 
-        text, keyboard = main_panel(chat_id)
+        code = create_game()
 
         await query.message.reply_text(
-            text,
+            "🎮 *GAME CREATED!*\n\n"
+            "Choose your role:",
             parse_mode="Markdown",
-            reply_markup=keyboard,
+            reply_markup=role_keyboard(code),
         )
 
         return
 
     # --------------------------------------------------------
-    # JOIN
+    # ROLE SELECTION
     # --------------------------------------------------------
 
-    if query.data == "join":
+    if data.startswith("role:"):
 
-        already_joined = any(
-            p["id"] == user.id
-            for p in game["players"]
-        )
+        _, role, code = data.split(":")
 
-        if already_joined:
+        if code not in games:
             await query.answer(
-                "You're already in the game!",
-                show_alert=True,
+                "Game not found.",
+                show_alert=True
             )
             return
 
-        game["players"].append({
+        game = games[code]
+
+        selected_role = "girl" if role == "g" else "boy"
+
+        # Prevent same user taking both roles
+        other_role = "boy" if selected_role == "girl" else "girl"
+
+        if game[other_role] and game[other_role]["id"] == user.id:
+            await query.answer(
+                "You already selected the other role!",
+                show_alert=True
+            )
+            return
+
+        # Check whether role is occupied
+        if game[selected_role]:
+
+            if game[selected_role]["id"] != user.id:
+                await query.answer(
+                    "That role is already taken!",
+                    show_alert=True
+                )
+                return
+
+        game[selected_role] = {
             "id": user.id,
             "name": user.first_name,
-        })
+            "role": selected_role,
+        }
 
         await query.answer(
-            f"{user.first_name} joined! 🎉",
-            show_alert=True,
+            "Role selected! 🎉",
+            show_alert=True
         )
-
-        text, keyboard = main_panel(chat_id)
 
         await query.message.reply_text(
-            text,
+            game_panel(code),
             parse_mode="Markdown",
-            reply_markup=keyboard,
-        )
-
-        return
-
-    # --------------------------------------------------------
-    # LEAVE
-    # --------------------------------------------------------
-
-    if query.data == "leave":
-
-        game["players"] = [
-            p for p in game["players"]
-            if p["id"] != user.id
-        ]
-
-        if game["current_player"] == user.id:
-            game["current_player"] = None
-
-        await query.answer(
-            "You left the game.",
-            show_alert=True,
-        )
-
-        text, keyboard = main_panel(chat_id)
-
-        await query.message.reply_text(
-            text,
-            parse_mode="Markdown",
-            reply_markup=keyboard,
+            reply_markup=game_keyboard(code),
         )
 
         return
@@ -386,82 +441,129 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # START GAME
     # --------------------------------------------------------
 
-    if query.data == "start_game":
+    if data.startswith("begin:"):
 
-        if len(game["players"]) < 2:
+        code = data.split(":")[1]
+
+        if code not in games:
             await query.answer(
-                "You need at least 2 players!",
-                show_alert=True,
+                "Game not found.",
+                show_alert=True
             )
             return
 
-        game["started"] = True
-        game["current_player"] = None
+        game = games[code]
+
+        if not game["girl"] or not game["boy"]:
+            await query.answer(
+                "You need both a girl and a boy!",
+                show_alert=True
+            )
+            return
+
+        game["active"] = True
+        game["round"] = 0
+        game["turn"] = None
 
         await query.answer("Game started! 🔥")
 
-        await send_challenge(query, "random")
-
-        return
-
-    # --------------------------------------------------------
-    # TRUTH
-    # --------------------------------------------------------
-
-    if query.data == "truth":
-
-        await send_challenge(query, "truth")
-
-        return
-
-    # --------------------------------------------------------
-    # DARE
-    # --------------------------------------------------------
-
-    if query.data == "dare":
-
-        await send_challenge(query, "dare")
-
-        return
-
-    # --------------------------------------------------------
-    # RANDOM
-    # --------------------------------------------------------
-
-    if query.data == "random":
-
-        await send_challenge(query, "random")
-
-        return
-
-    # --------------------------------------------------------
-    # NEXT
-    # --------------------------------------------------------
-
-    if query.data == "next":
-
-        await send_challenge(query, "random")
-
-        return
-
-    # --------------------------------------------------------
-    # DONE
-    # --------------------------------------------------------
-
-    if query.data == "done":
-
-        await query.answer(
-            "Challenge completed! 🔥",
-            show_alert=True,
+        await send_challenge(
+            query,
+            code,
+            "random"
         )
 
-        await send_challenge(query, "random")
-
         return
+
+    # --------------------------------------------------------
+    # TRUTH / DARE / RANDOM / NEXT / DONE
+    # --------------------------------------------------------
+
+    if ":" not in data:
+        return
+
+    action, code = data.split(":", 1)
+
+    if code not in games:
+        await query.answer(
+            "This game no longer exists.",
+            show_alert=True
+        )
+        return
+
+    game = games[code]
+
+    if not game["active"]:
+        await query.answer(
+            "The game hasn't started yet!",
+            show_alert=True
+        )
+        return
+
+    # Make sure only the two players can control the game
+    player_ids = []
+
+    if game["girl"]:
+        player_ids.append(game["girl"]["id"])
+
+    if game["boy"]:
+        player_ids.append(game["boy"]["id"])
+
+    if user.id not in player_ids:
+        await query.answer(
+            "You're not one of the players.",
+            show_alert=True
+        )
+        return
+
+    if action == "truth":
+
+        await send_challenge(
+            query,
+            code,
+            "truth"
+        )
+
+    elif action == "dare":
+
+        await send_challenge(
+            query,
+            code,
+            "dare"
+        )
+
+    elif action == "random":
+
+        await send_challenge(
+            query,
+            code,
+            "random"
+        )
+
+    elif action == "next":
+
+        await send_challenge(
+            query,
+            code,
+            "random"
+        )
+
+    elif action == "done":
+
+        await query.answer(
+            "Completed! 🔥 Next turn!",
+            show_alert=True
+        )
+
+        await send_challenge(
+            query,
+            code,
+            "random"
+        )
 
 
 # ============================================================
-# BOT
+# MAIN
 # ============================================================
 
 def main():
@@ -469,7 +571,9 @@ def main():
     token = os.environ.get("BOT_TOKEN")
 
     if not token:
-        raise ValueError("BOT_TOKEN is not set!")
+        raise ValueError(
+            "BOT_TOKEN environment variable is missing!"
+        )
 
     app = Application.builder().token(token).build()
 
@@ -481,7 +585,7 @@ def main():
         CallbackQueryHandler(button)
     )
 
-    print("🔥 Multiplayer Truth or Dare bot is running!")
+    print("🔥 Private Truth or Dare bot is running!")
 
     app.run_polling()
 
