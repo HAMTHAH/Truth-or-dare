@@ -294,14 +294,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.inline_query
-    code = secrets.token_hex(5)
-
-    # Create and save the game immediately
-    games[code] = {
-        "players": [],
-        "turn": 0,
-        "started": False
-    }
+    code = create_game(None)
 
     results = [
         InlineQueryResultArticle(
