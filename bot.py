@@ -1,6 +1,7 @@
 import os
 import secrets
 import random
+
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -8,23 +9,24 @@ from telegram import (
     InlineQueryResultArticle,
     InputTextMessageContent,
 )
+
 from telegram.ext import (
     Application,
     CommandHandler,
     InlineQueryHandler,
     CallbackQueryHandler,
-    ChosenInlineResultHandler,
     ContextTypes,
 )
 
+
 # ============================================================
-# CONFIG
+# TOKEN
 # ============================================================
 
 TOKEN = os.getenv("BOT_TOKEN")
 
 if not TOKEN:
-    raise RuntimeError("BOT_TOKEN environment variable is missing.")
+    raise RuntimeError("BOT_TOKEN is missing.")
 
 
 # ============================================================
@@ -136,40 +138,9 @@ DARES = [
 
 games = {}
 
-# Temporary inline results.
-# IMPORTANT:
-# Creating an inline query does NOT change the game.
-# The game changes only after ChosenInlineResult arrives.
-pending_results = {}
 
-
-# ============================================================
-# HELPERS
-# ============================================================
-
-def new_id():
+def make_id():
     return secrets.token_hex(8)
-
-
-def player_key(game, user_id):
-    if game["player1_id"] == user_id:
-        return "player1"
-
-    if game["player2_id"] == user_id:
-        return "player2"
-
-    return None
-
-
-def player_name(game, player):
-    if player == "player1":
-        return game["player1_name"]
-
-    return game["player2_name"]
-
-
-def other_player(player):
-    return "player2" if player == "player1" else "player1"
 
 
 def create_game():
@@ -184,12 +155,12 @@ def create_game():
 
         "active": False,
 
-        # Player 1 always starts.
+        # ALWAYS player1 first
         "turn": "player1",
 
         "round": 0,
 
-        # Current active challenge.
+        # Current challenge
         "challenge_id": None,
         "challenge_type": None,
         "challenge_text": None,
@@ -199,52 +170,83 @@ def create_game():
     return code
 
 
-def buttons_for_new_challenge(code, previous_id=""):
+def get_player(game, user_id):
+    if game["player1_id"] == user_id:
+        return "player1"
+
+    if game["player2_id"] == user_id:
+        return "player2"
+
+    return None
+
+
+def other_player(player):
+    return "player2" if player == "player1" else "player1"
+
+
+def get_name(game, player):
+    if player == "player1":
+        return game["player1_name"]
+
+    return game["player2_name"]
+
+
+# ============================================================
+# BUTTONS
+# ============================================================
+
+def challenge_buttons(code, previous_id=""):
+
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
                 "📝 TRUTH",
-                switch_inline_query_current_chat=f"truth|{code}|{previous_id}"
+                switch_inline_query_current_chat=
+                f"truth|{code}|{previous_id}"
             ),
+
             InlineKeyboardButton(
                 "🎯 DARE",
-                switch_inline_query_current_chat=f"dare|{code}|{previous_id}"
+                switch_inline_query_current_chat=
+                f"dare|{code}|{previous_id}"
             ),
+
             InlineKeyboardButton(
                 "🎲 RANDOM",
-                switch_inline_query_current_chat=f"random|{code}|{previous_id}"
+                switch_inline_query_current_chat=
+                f"random|{code}|{previous_id}"
             ),
         ]
     ])
 
 
 def answer_button(code, challenge_id):
+
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
                 "✍️ ANSWER",
-                switch_inline_query_current_chat=f"answer|{code}|{challenge_id}|"
+                switch_inline_query_current_chat=
+                f"answer|{code}|{challenge_id}|"
             )
         ]
     ])
 
 
 # ============================================================
-# START COMMAND
+# /START
 # ============================================================
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text(
         "🔥 NAUGHTY DARE\n\n"
-        "Start a 1-on-1 game by typing:\n\n"
-        "@NAUGHTYDARE_bot\n\n"
-        "inside your private chat."
+        "Type @NAUGHTYDARE_bot in a private chat to start a game."
     )
 
 
 # ============================================================
-# INLINE QUERY
+# INLINE MODE
 # ============================================================
 
 async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -252,25 +254,29 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.inline_query
     text = query.query.strip()
 
-    # --------------------------------------------------------
-    # EMPTY QUERY = CREATE GAME
-    # --------------------------------------------------------
+    # ========================================================
+    # CREATE GAME
+    # ========================================================
 
     if not text:
 
         code = create_game()
 
         result = InlineQueryResultArticle(
-            id=f"lobby:{code}",
+            id=f"lobby_{code}",
+
             title="🔥 START 1-ON-1 GAME",
-            description="Create a private Truth or Dare game",
+
+            description="Start a private Truth or Dare game.",
+
             input_message_content=InputTextMessageContent(
                 "🔥 <b>TRUTH OR DARE</b>\n\n"
                 "👤 Player 1: waiting...\n"
                 "👤 Player 2: waiting...\n\n"
-                "Tap JOIN GAME to join.",
+                "Tap JOIN GAME.",
                 parse_mode="HTML",
             ),
+
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -281,7 +287,12 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]),
         )
 
-        await query.answer([result], cache_time=0, is_personal=True)
+        await query.answer(
+            [result],
+            cache_time=0,
+            is_personal=True
+        )
+
         return
 
     parts = text.split("|", 3)
@@ -289,7 +300,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     action = parts[0]
 
     # ========================================================
-    # ANSWER INLINE QUERY
+    # ANSWER
     # ========================================================
 
     if action == "answer":
@@ -299,7 +310,11 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         code = parts[1]
         challenge_id = parts[2]
-        answer_text = parts[3].strip() if len(parts) >= 4 else ""
+
+        answer_text = ""
+
+        if len(parts) >= 4:
+            answer_text = parts[3].strip()
 
         game = games.get(code)
 
@@ -307,14 +322,21 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer([], cache_time=0)
             return
 
+        # ----------------------------------------------------
+        # ASK USER TO TYPE ANSWER
+        # ----------------------------------------------------
+
         if not answer_text:
 
             result = InlineQueryResultArticle(
-                id=f"answer-help:{new_id()}",
+                id=f"answer_help_{make_id()}",
+
                 title="✍️ TYPE YOUR ANSWER",
-                description="Type your answer in the inline box, then send it.",
+
+                description="Type your answer after the command.",
+
                 input_message_content=InputTextMessageContent(
-                    "✍️ Type your answer above, then select the answer result."
+                    "✍️ Type your answer in the inline box."
                 ),
             )
 
@@ -323,28 +345,129 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 cache_time=0,
                 is_personal=True
             )
+
             return
 
-        # Do NOT change the game here.
-        result_id = f"answer:{new_id()}"
+        player = get_player(game, query.from_user.id)
 
-        pending_results[result_id] = {
-            "type": "answer",
-            "code": code,
-            "challenge_id": challenge_id,
-            "user_id": query.from_user.id,
-            "answer": answer_text,
-        }
+        if not player:
+
+            result = InlineQueryResultArticle(
+                id=f"error_{make_id()}",
+                title="❌ YOU ARE NOT IN THIS GAME",
+                input_message_content=InputTextMessageContent(
+                    "❌ You are not one of the players."
+                ),
+            )
+
+            await query.answer(
+                [result],
+                cache_time=0,
+                is_personal=True
+            )
+
+            return
+
+        # ====================================================
+        # IMPORTANT:
+        # CHECK OLD CHALLENGE FIRST
+        # ====================================================
+
+        if game["challenge_id"] != challenge_id:
+
+            result = InlineQueryResultArticle(
+                id=f"old_answer_{make_id()}",
+
+                title="⚠️ OLD QUESTION",
+
+                description="This question has already been completed.",
+
+                input_message_content=InputTextMessageContent(
+                    "⚠️ <b>This is an old question.</b>\n\n"
+                    "Use the newest game panel.",
+                    parse_mode="HTML",
+                ),
+            )
+
+            await query.answer(
+                [result],
+                cache_time=0,
+                is_personal=True
+            )
+
+            return
+
+        # Now check challenge type
+        if game["challenge_type"] != "truth":
+
+            result = InlineQueryResultArticle(
+                id=f"invalid_{make_id()}",
+                title="⚠️ THIS QUESTION IS CLOSED",
+                input_message_content=InputTextMessageContent(
+                    "⚠️ This question is already closed."
+                ),
+            )
+
+            await query.answer(
+                [result],
+                cache_time=0,
+                is_personal=True
+            )
+
+            return
+
+        # Now check whose turn
+        if player != game["turn"]:
+
+            result = InlineQueryResultArticle(
+                id=f"turn_{make_id()}",
+
+                title="⏳ NOT YOUR TURN",
+
+                description=f"It's {get_name(game, game['turn'])}'s turn.",
+
+                input_message_content=InputTextMessageContent(
+                    f"⏳ It's <b>{get_name(game, game['turn'])}</b>'s turn.",
+                    parse_mode="HTML",
+                ),
+            )
+
+            await query.answer(
+                [result],
+                cache_time=0,
+                is_personal=True
+            )
+
+            return
+
+        # ----------------------------------------------------
+        # COMPLETE TRUTH
+        # ----------------------------------------------------
+
+        answered_by = get_name(game, player)
+
+        game["challenge_id"] = None
+        game["challenge_type"] = None
+        game["challenge_text"] = None
+        game["challenge_player"] = None
+
+        game["turn"] = other_player(player)
+
+        next_player = game["turn"]
 
         result = InlineQueryResultArticle(
-            id=result_id,
-            title="✅ SEND ANSWER",
-            description=answer_text[:100],
+            id=f"answer_sent_{make_id()}",
+
+            title="✅ ANSWER",
+
             input_message_content=InputTextMessageContent(
-                f"💬 <b>{query.from_user.first_name}</b>'s answer:\n\n"
-                f"{answer_text}",
+                f"💬 <b>{answered_by}</b> answered:\n\n"
+                f"{answer_text}\n\n"
+                f"👉 <b>{get_name(game, next_player)}'s turn</b>",
                 parse_mode="HTML",
             ),
+
+            reply_markup=challenge_buttons(code)
         )
 
         await query.answer(
@@ -352,6 +475,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             cache_time=0,
             is_personal=True
         )
+
         return
 
     # ========================================================
@@ -359,6 +483,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # ========================================================
 
     if action not in ("truth", "dare", "random"):
+
         await query.answer([], cache_time=0)
         return
 
@@ -371,40 +496,37 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     game = games.get(code)
 
-    if not game:
+    if not game or not game["active"]:
         await query.answer([], cache_time=0)
         return
 
-    if not game["active"]:
-        await query.answer([], cache_time=0)
-        return
-
-    player = player_key(game, query.from_user.id)
+    player = get_player(game, query.from_user.id)
 
     if not player:
         await query.answer([], cache_time=0)
         return
 
-    # --------------------------------------------------------
-    # DO NOT CHANGE TURN HERE.
+    # ========================================================
+    # MOST IMPORTANT FIX
     #
-    # We only prepare a candidate result.
-    # The turn changes later in chosen_inline_result().
-    # --------------------------------------------------------
+    # CHECK OLD PANEL BEFORE CHECKING TURN
+    # ========================================================
 
-    # Current challenge exists.
     if game["challenge_id"]:
 
-        # Old button/panel.
         if previous_id != game["challenge_id"]:
 
             result = InlineQueryResultArticle(
-                id=f"old:{new_id()}",
-                title="⚠️ OLD PANEL",
-                description="Use the buttons on the newest challenge.",
+                id=f"old_panel_{make_id()}",
+
+                title="⚠️ OLD GAME PANEL",
+
+                description="Use the newest panel.",
+
                 input_message_content=InputTextMessageContent(
-                    "⚠️ <b>This is an old game panel.</b>\n\n"
-                    "Use the buttons on the newest challenge.",
+                    "⚠️ <b>OLD GAME PANEL</b>\n\n"
+                    "This button belongs to an earlier round.\n\n"
+                    "Use the buttons on the newest panel.",
                     parse_mode="HTML",
                 ),
             )
@@ -414,86 +536,27 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 cache_time=0,
                 is_personal=True
             )
+
             return
-
-        # Current challenge is Truth.
-        # It must be answered first.
-        if game["challenge_type"] == "truth":
-
-            result = InlineQueryResultArticle(
-                id=f"waiting:{new_id()}",
-                title="⏳ ANSWER THE CURRENT TRUTH",
-                description="The current Truth must be answered first.",
-                input_message_content=InputTextMessageContent(
-                    "⏳ Answer the current Truth first."
-                ),
-            )
-
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
-            return
-
-        # Current challenge is Dare.
-        # Selecting another challenge means the Dare was completed.
-        #
-        # But we still DON'T change the game yet.
-        #
-        # chosen_inline_result will do that.
-        if game["challenge_type"] == "dare":
-
-            if player != game["turn"]:
-
-                result = InlineQueryResultArticle(
-                    id=f"not-turn:{new_id()}",
-                    title="⏳ NOT YOUR TURN",
-                    description=f"It's {player_name(game, game['turn'])}'s turn.",
-                    input_message_content=InputTextMessageContent(
-                        f"⏳ It's <b>{player_name(game, game['turn'])}</b>'s turn.",
-                        parse_mode="HTML",
-                    ),
-                )
-
-                await query.answer(
-                    [result],
-                    cache_time=0,
-                    is_personal=True
-                )
-                return
 
     else:
 
         # No active challenge.
-        # Only current player can start one.
-        if player != game["turn"]:
+        # If an old panel supplied a previous ID,
+        # it is automatically stale.
 
-            result = InlineQueryResultArticle(
-                id=f"not-turn:{new_id()}",
-                title="⏳ NOT YOUR TURN",
-                description=f"It's {player_name(game, game['turn'])}'s turn.",
-                input_message_content=InputTextMessageContent(
-                    f"⏳ It's <b>{player_name(game, game['turn'])}</b>'s turn.",
-                    parse_mode="HTML",
-                ),
-            )
-
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
-            return
-
-        # There should be no previous ID when starting a fresh challenge.
         if previous_id:
+
             result = InlineQueryResultArticle(
-                id=f"old:{new_id()}",
-                title="⚠️ OLD PANEL",
+                id=f"old_panel_{make_id()}",
+
+                title="⚠️ OLD GAME PANEL",
+
                 description="Use the newest panel.",
+
                 input_message_content=InputTextMessageContent(
-                    "⚠️ <b>Use the newest game panel.</b>",
+                    "⚠️ <b>OLD GAME PANEL</b>\n\n"
+                    "Use the newest game panel.",
                     parse_mode="HTML",
                 ),
             )
@@ -503,11 +566,86 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 cache_time=0,
                 is_personal=True
             )
+
             return
 
-    # --------------------------------------------------------
-    # PICK CHALLENGE
-    # --------------------------------------------------------
+    # ========================================================
+    # NOW CHECK TURN
+    # ========================================================
+
+    if player != game["turn"]:
+
+        result = InlineQueryResultArticle(
+            id=f"wrong_turn_{make_id()}",
+
+            title="⏳ NOT YOUR TURN",
+
+            description=f"It's {get_name(game, game['turn'])}'s turn.",
+
+            input_message_content=InputTextMessageContent(
+                f"⏳ <b>{get_name(game, game['turn'])}</b>'s turn.\n\n"
+                f"Please wait.",
+                parse_mode="HTML",
+            ),
+        )
+
+        await query.answer(
+            [result],
+            cache_time=0,
+            is_personal=True
+        )
+
+        return
+
+    # ========================================================
+    # IF CURRENT CHALLENGE IS TRUTH
+    # ========================================================
+
+    if game["challenge_id"]:
+
+        if game["challenge_type"] == "truth":
+
+            result = InlineQueryResultArticle(
+                id=f"must_answer_{make_id()}",
+
+                title="✍️ ANSWER THE CURRENT TRUTH",
+
+                description="You must answer the current Truth first.",
+
+                input_message_content=InputTextMessageContent(
+                    "✍️ <b>Answer the current Truth first.</b>",
+                    parse_mode="HTML",
+                ),
+            )
+
+            await query.answer(
+                [result],
+                cache_time=0,
+                is_personal=True
+            )
+
+            return
+
+        # ----------------------------------------------------
+        # CURRENT CHALLENGE IS DARE
+        #
+        # Choosing a new challenge completes the Dare.
+        # ----------------------------------------------------
+
+        if game["challenge_type"] == "dare":
+
+            game["turn"] = other_player(game["turn"])
+
+            player = game["turn"]
+
+            game["challenge_id"] = None
+            game["challenge_type"] = None
+            game["challenge_text"] = None
+            game["challenge_player"] = None
+
+    # ========================================================
+    # CHOOSE TYPE
+    # ========================================================
 
     if action == "random":
         challenge_type = random.choice(["truth", "dare"])
@@ -519,54 +657,83 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         challenge_text = random.choice(DARES)
 
-    candidate_id = new_id()
+    # ========================================================
+    # NEW CHALLENGE ID
+    # ========================================================
 
-    result_id = f"challenge:{candidate_id}"
+    challenge_id = make_id()
 
-    pending_results[result_id] = {
-        "type": "challenge",
-        "code": code,
-        "user_id": query.from_user.id,
-        "player": player,
-        "challenge_type": challenge_type,
-        "challenge_text": challenge_text,
-        "previous_id": previous_id,
-    }
+    game["round"] += 1
+
+    game["challenge_id"] = challenge_id
+    game["challenge_type"] = challenge_type
+    game["challenge_text"] = challenge_text
+    game["challenge_player"] = player
+
+    # ========================================================
+    # TRUTH PANEL
+    # ========================================================
 
     if challenge_type == "truth":
 
-        keyboard = answer_button(code, candidate_id)
-
         message = (
             f"📝 <b>TRUTH</b>\n\n"
-            f"👤 <b>{player_name(game, player)}</b>\n\n"
+            f"👤 <b>{get_name(game, player)}</b>'s turn\n\n"
             f"{challenge_text}"
         )
 
-    else:
-
-        keyboard = buttons_for_new_challenge(
+        keyboard = answer_button(
             code,
-            candidate_id
+            challenge_id
         )
+
+        result = InlineQueryResultArticle(
+            id=f"truth_{challenge_id}",
+
+            title=f"📝 TRUTH — {get_name(game, player)}",
+
+            description=challenge_text[:100],
+
+            input_message_content=InputTextMessageContent(
+                message,
+                parse_mode="HTML",
+            ),
+
+            reply_markup=keyboard,
+        )
+
+    # ========================================================
+    # DARE PANEL
+    # ========================================================
+
+    else:
 
         message = (
             f"🎯 <b>DARE</b>\n\n"
-            f"👤 <b>{player_name(game, player)}</b>\n\n"
+            f"👤 <b>{get_name(game, player)}</b>'s turn\n\n"
             f"{challenge_text}\n\n"
             f"Complete the dare, then choose the next challenge."
         )
 
-    result = InlineQueryResultArticle(
-        id=result_id,
-        title=f"{'📝 TRUTH' if challenge_type == 'truth' else '🎯 DARE'} — {player_name(game, player)}",
-        description=challenge_text[:100],
-        input_message_content=InputTextMessageContent(
-            message,
-            parse_mode="HTML",
-        ),
-        reply_markup=keyboard,
-    )
+        keyboard = challenge_buttons(
+            code,
+            challenge_id
+        )
+
+        result = InlineQueryResultArticle(
+            id=f"dare_{challenge_id}",
+
+            title=f"🎯 DARE — {get_name(game, player)}",
+
+            description=challenge_text[:100],
+
+            input_message_content=InputTextMessageContent(
+                message,
+                parse_mode="HTML",
+            ),
+
+            reply_markup=keyboard,
+        )
 
     await query.answer(
         [result],
@@ -576,160 +743,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================================
-# CHOSEN INLINE RESULT
-# ============================================================
-
-async def chosen_inline_result(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
-
-    chosen = update.chosen_inline_result
-
-    result_id = chosen.result_id
-    user_id = chosen.from_user.id
-
-    pending = pending_results.pop(result_id, None)
-
-    if not pending:
-        return
-
-    code = pending["code"]
-
-    game = games.get(code)
-
-    if not game:
-        return
-
-    # ========================================================
-    # ANSWER WAS ACTUALLY SELECTED
-    # ========================================================
-
-    if pending["type"] == "answer":
-
-        if pending["user_id"] != user_id:
-            return
-
-        challenge_id = pending["challenge_id"]
-
-        # Challenge has changed since the answer was prepared.
-        if game["challenge_id"] != challenge_id:
-            return
-
-        # Must still be Truth.
-        if game["challenge_type"] != "truth":
-            return
-
-        player = player_key(game, user_id)
-
-        if not player:
-            return
-
-        # Must be the player who owns the Truth.
-        if player != game["challenge_player"]:
-            return
-
-        # Must be the current turn.
-        if player != game["turn"]:
-            return
-
-        # ----------------------------------------------------
-        # TRUTH COMPLETE
-        # ----------------------------------------------------
-
-        answered_by = player_name(game, player)
-
-        game["challenge_id"] = None
-        game["challenge_type"] = None
-        game["challenge_text"] = None
-        game["challenge_player"] = None
-
-        game["turn"] = other_player(player)
-
-        next_name = player_name(game, game["turn"])
-
-        # Nothing else needed here.
-        # The next player will use the buttons from the
-        # answer panel to start the next challenge.
-
-        return
-
-    # ========================================================
-    # CHALLENGE WAS ACTUALLY SELECTED
-    # ========================================================
-
-    if pending["type"] == "challenge":
-
-        if pending["user_id"] != user_id:
-            return
-
-        player = player_key(game, user_id)
-
-        if not player:
-            return
-
-        previous_id = pending["previous_id"]
-
-        # ----------------------------------------------------
-        # CASE 1: NEW GAME / NO CURRENT CHALLENGE
-        # ----------------------------------------------------
-
-        if not game["challenge_id"]:
-
-            # Must be current player's turn.
-            if player != game["turn"]:
-                return
-
-            # Must not be pretending to come from an old panel.
-            if previous_id:
-                return
-
-        # ----------------------------------------------------
-        # CASE 2: CURRENT DARE IS BEING COMPLETED
-        # ----------------------------------------------------
-
-        else:
-
-            # Previous panel must exactly match current challenge.
-            if previous_id != game["challenge_id"]:
-                return
-
-            # Only a Dare can be completed this way.
-            if game["challenge_type"] != "dare":
-                return
-
-            # Current player must be the person who had the Dare.
-            if player != game["challenge_player"]:
-                return
-
-            # Current player must actually own the turn.
-            if player != game["turn"]:
-                return
-
-            # ------------------------------------------------
-            # DARE COMPLETE → SWITCH PLAYER
-            # ------------------------------------------------
-
-            game["turn"] = other_player(player)
-
-            player = game["turn"]
-
-        # ----------------------------------------------------
-        # CREATE THE ACTUAL ACTIVE CHALLENGE
-        # ----------------------------------------------------
-
-        game["round"] += 1
-
-        game["challenge_id"] = result_id.replace("challenge:", "")
-        game["challenge_type"] = pending["challenge_type"]
-        game["challenge_text"] = pending["challenge_text"]
-        game["challenge_player"] = player
-
-        return
-
-
-# ============================================================
-# CALLBACK BUTTONS
+# CALLBACK HANDLER
 # ============================================================
 
 async def callback_handler(
@@ -758,9 +772,11 @@ async def callback_handler(
     game = games.get(code)
 
     if not game:
+
         await query.edit_message_text(
             "❌ This game no longer exists."
         )
+
         return
 
     # ========================================================
@@ -772,34 +788,33 @@ async def callback_handler(
         user_id = query.from_user.id
         name = query.from_user.first_name
 
-        # Already Player 1
+        # Already player 1
         if game["player1_id"] == user_id:
 
-            await query.edit_message_text(
-                f"🔥 <b>TRUTH OR DARE</b>\n\n"
-                f"👤 Player 1: <b>{game['player1_name']}</b>\n"
-                f"👤 Player 2: waiting...\n\n"
-                f"Waiting for another player.",
-                parse_mode="HTML",
+            await query.answer(
+                "You are already Player 1.",
+                show_alert=True
             )
+
             return
 
-        # Already Player 2
+        # Already player 2
         if game["player2_id"] == user_id:
 
             await query.answer(
                 "You are already Player 2.",
                 show_alert=True
             )
+
             return
 
-        # Fill Player 1
+        # First player
         if game["player1_id"] is None:
 
             game["player1_id"] = user_id
             game["player1_name"] = name
 
-        # Fill Player 2
+        # Second player
         elif game["player2_id"] is None:
 
             game["player2_id"] = user_id
@@ -811,10 +826,11 @@ async def callback_handler(
                 "This game already has two players.",
                 show_alert=True
             )
+
             return
 
         # ----------------------------------------------------
-        # WAITING FOR SECOND PLAYER
+        # WAITING
         # ----------------------------------------------------
 
         if game["player2_id"] is None:
@@ -823,8 +839,9 @@ async def callback_handler(
                 f"🔥 <b>TRUTH OR DARE</b>\n\n"
                 f"👤 Player 1: <b>{game['player1_name']}</b>\n"
                 f"👤 Player 2: waiting...\n\n"
-                f"Share this message with the person you want to play with.",
+                f"Waiting for Player 2.",
                 parse_mode="HTML",
+
                 reply_markup=InlineKeyboardMarkup([
                     [
                         InlineKeyboardButton(
@@ -838,7 +855,7 @@ async def callback_handler(
             return
 
         # ----------------------------------------------------
-        # TWO PLAYERS READY
+        # BOTH PLAYERS READY
         # ----------------------------------------------------
 
         game["turn"] = "player1"
@@ -850,6 +867,7 @@ async def callback_handler(
             f"🎮 Both players are ready!\n\n"
             f"▶️ <b>{game['player1_name']}</b> starts.",
             parse_mode="HTML",
+
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -868,25 +886,34 @@ async def callback_handler(
 
     if action == "start":
 
-        if not game["player1_id"] or not game["player2_id"]:
-            await query.answer(
-                "Both players must join first.",
-                show_alert=True
-            )
-            return
+        user_id = query.from_user.id
 
-        if query.from_user.id not in (
+        if user_id not in (
             game["player1_id"],
             game["player2_id"]
         ):
+
             await query.answer(
                 "You are not one of the players.",
                 show_alert=True
             )
+
             return
 
+        if not game["player1_id"] or not game["player2_id"]:
+
+            await query.answer(
+                "Both players need to join first.",
+                show_alert=True
+            )
+
+            return
+
+        # Reset game
         game["active"] = True
+
         game["turn"] = "player1"
+
         game["round"] = 0
 
         game["challenge_id"] = None
@@ -900,7 +927,8 @@ async def callback_handler(
             f"👤 Player 2: <b>{game['player2_name']}</b>\n\n"
             f"🎯 <b>{game['player1_name']}'s turn</b>",
             parse_mode="HTML",
-            reply_markup=buttons_for_new_challenge(code)
+
+            reply_markup=challenge_buttons(code)
         )
 
         return
@@ -914,21 +942,19 @@ def main():
 
     app = Application.builder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(
+        CommandHandler("start", start)
+    )
 
     app.add_handler(
         InlineQueryHandler(inline_query)
     )
 
     app.add_handler(
-        ChosenInlineResultHandler(chosen_inline_result)
-    )
-
-    app.add_handler(
         CallbackQueryHandler(callback_handler)
     )
 
-    print("🔥 NAUGHTYDARE bot is running...")
+    print("🔥 NAUGHTYDARE BOT RUNNING")
 
     app.run_polling(
         allowed_updates=Update.ALL_TYPES
