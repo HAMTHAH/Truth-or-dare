@@ -1,6 +1,6 @@
 import os
-import secrets
 import random
+import secrets
 
 from telegram import (
     Update,
@@ -22,12 +22,8 @@ from telegram.ext import (
 TOKEN = os.getenv("BOT_TOKEN")
 
 if not TOKEN:
-    raise RuntimeError("BOT_TOKEN is missing.")
+    raise RuntimeError("BOT_TOKEN is missing")
 
-
-# ============================================================
-# QUESTIONS
-# ============================================================
 
 TRUTHS = [
     "What is the first thing you would do if I walked through your door right now?",
@@ -38,39 +34,18 @@ TRUTHS = [
     "What's the dirtiest thought you've had about me today?",
     "What's a secret fantasy you've never told anyone?",
     "Do you prefer spicy photos or flirty voice notes?",
-    "What kind of romantic roleplay would you find fun?",
-    "Describe exactly how it feels when someone kisses your neck.",
-    "Have you ever smiled at your phone because of me?",
-    "What's the most attractive thing about me?",
-    "Have you ever imagined us going on a romantic date?",
-    "What's something you've wanted to tell me but never had the courage to?",
-    "What's one thing I do that instantly gets your attention?",
+    "What is the most attractive thing about me?",
     "Have you ever gotten jealous because of me?",
     "What's the boldest thing you'd do on a date with me?",
-    "What kind of compliment from me would make your whole day?",
-    "What is one secret you've been keeping from me?",
-    "Have you ever had a crush on someone you shouldn't have?",
-    "What's the most embarrassing thing you've done because you liked someone?",
-    "What is your biggest weakness when it comes to flirting?",
-    "Do you prefer someone making the first move or making you make it?",
+    "What's your biggest weakness when it comes to flirting?",
     "What's your favorite kind of romantic attention?",
     "What's something that instantly makes someone attractive to you?",
-    "Have you ever pretended not to like someone when you actually did?",
-    "What is the sweetest thing someone has ever done for you?",
+    "What's the sweetest thing someone has ever done for you?",
     "What's something you've always wanted to try on a romantic date?",
-    "What's the most attractive thing someone can whisper to you?",
     "Have you ever imagined kissing someone while talking to them?",
     "What kind of date would make you fall for someone?",
-    "What's one thing that can instantly make you nervous around someone?",
     "Have you ever flirted with someone just for fun?",
-    "What's the most romantic place you'd want to kiss someone?",
-    "What is your biggest turn-on when it comes to personality?",
-    "What kind of outfit do you find most attractive?",
-    "What's the longest you've ever had a crush on someone?",
     "What is one thing you would love to hear from me right now?",
-    "What is your favorite memory involving me?",
-    "If we were alone together for a whole day, what would you want to do?",
-    "What's something about me you find impossible to ignore?",
 ]
 
 
@@ -86,126 +61,92 @@ DARES = [
     "Give the other player your best pickup line.",
     "Pretend you're asking the other player on a first date.",
     "Write a cheesy romantic confession.",
-    "Send a voice note pretending you're nervous because you like them.",
-    "Give the other player a compliment without using the words beautiful, cute, or attractive.",
+    "Give the other player a compliment without using beautiful, cute, or attractive.",
     "Describe the other player using only five words.",
     "Tell the other player what their ideal romantic nickname should be.",
-    "Send a voice note saying 'I miss you' dramatically.",
+    "Send a voice note saying I miss you dramatically.",
     "Write a fake romantic movie scene starring you two.",
     "Tell the other player what your first impression of them was.",
     "Give the other player a ridiculous but romantic proposal.",
     "Send three emojis that describe your feelings toward the other player.",
     "Tell the other player what song reminds you of them.",
-    "Write a flirty text that starts with 'I probably shouldn't tell you this, but...'",
     "Pretend you are jealous and send a dramatic message.",
     "Give the other player your most creative compliment.",
-    "Describe what your dream evening together would look like.",
-    "Send a voice note saying something sweet without laughing.",
+    "Describe your dream evening together.",
     "Write a romantic message using only emojis.",
     "Tell the other player why they would be difficult to forget.",
-    "Make up a secret code word that means 'I want your attention.'",
-    "Send the other player a message that starts with 'Confession:'",
     "Describe your perfect hug.",
-    "Give the other player a new nickname and explain it.",
-    "Pretend you're texting them after the best date of your life.",
-    "Write a short love letter in exactly five sentences.",
-    "Tell the other player what you would notice first if they walked into a room.",
-    "Send a voice note saying the sweetest thing you can think of.",
     "Create a romantic couple name for you two.",
-    "Tell the other player something you've never complimented them on before.",
-    "Write a flirty message without using the word 'love'.",
-    "Pretend you're trying to convince the other player to go on a date with you.",
+    "Write a flirty message without using the word love.",
     "Give the other player a rating out of 10 and explain your score.",
-    "Describe their personality using three romantic comparisons.",
-    "Send a message that would make someone think you're secretly in love.",
-    "Tell the other player one thing you hope happens between you two someday.",
-    "Write a dramatic 'goodnight' message as if you're completely obsessed with them.",
     "Send your best innocent-but-flirty pickup line.",
-    "Tell the other player what kind of date outfit you would wear.",
-    "Pretend you're meeting them for the first time and flirt with them.",
-    "Send a voice note saying their name three different ways.",
-    "Write the most cheesy romantic sentence you can think of.",
 ]
 
-
-# ============================================================
-# GAME STORAGE
-# ============================================================
 
 games = {}
 
 
-def make_id():
+def uid():
     return secrets.token_hex(8)
 
 
-def create_game():
+def new_game():
     code = secrets.token_hex(6)
 
     games[code] = {
-        "player1_id": None,
-        "player1_name": None,
-        "player2_id": None,
-        "player2_name": None,
-
+        "p1_id": None,
+        "p1_name": None,
+        "p2_id": None,
+        "p2_name": None,
         "active": False,
-
-        # Player 1 ALWAYS starts.
-        "turn": "player1",
-
-        "round": 0,
-
+        "turn": "p1",
         "challenge_id": None,
         "challenge_type": None,
-        "challenge_text": None,
         "challenge_player": None,
+        "challenge_text": None,
     }
 
     return code
 
 
 def get_player(game, user_id):
-    if game["player1_id"] == user_id:
-        return "player1"
+    if game["p1_id"] == user_id:
+        return "p1"
 
-    if game["player2_id"] == user_id:
-        return "player2"
+    if game["p2_id"] == user_id:
+        return "p2"
 
     return None
 
 
-def other_player(player):
-    return "player2" if player == "player1" else "player1"
+def other(player):
+    return "p2" if player == "p1" else "p1"
 
 
-def get_name(game, player):
-    if player == "player1":
-        return game["player1_name"]
+def name(game, player):
+    if player == "p1":
+        return game["p1_name"]
 
-    return game["player2_name"]
+    return game["p2_name"]
 
 
-# ============================================================
-# BUTTONS
-# ============================================================
-
-def challenge_buttons(code, previous_id=""):
+def game_buttons(code, challenge_id=""):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
                 "📝 TRUTH",
                 switch_inline_query_current_chat=
-                f"truth|{code}|{previous_id}"
+                f"truth|{code}|{challenge_id}"
             ),
             InlineKeyboardButton(
                 "🎯 DARE",
                 switch_inline_query_current_chat=
-                f"dare|{code}|{previous_id}"
+                f"dare|{code}|{challenge_id}"
             ),
             InlineKeyboardButton(
                 "🎲 RANDOM",
                 switch_inline_query_current_chat=
-                f"random|{code}|{previous_id}"
+                f"random|{code}|{challenge_id}"
             ),
         ]
     ])
@@ -223,43 +164,32 @@ def answer_button(code, challenge_id):
     ])
 
 
-# ============================================================
-# START
-# ============================================================
-
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "🔥 NAUGHTY DARE\n\n"
-        "Type @NAUGHTYDARE_bot in a private chat to start a game."
+        "Type @NAUGHTYDARE_bot in a private chat to start."
     )
 
 
-# ============================================================
-# INLINE QUERY
-# ============================================================
+async def inline(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    q = update.inline_query
+    text = q.query.strip()
 
-async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
-
-    query = update.inline_query
-    text = query.query.strip()
-
-    # ========================================================
+    # --------------------------------------------------------
     # NEW GAME
-    # ========================================================
+    # --------------------------------------------------------
 
     if not text:
-
-        code = create_game()
+        code = new_game()
 
         result = InlineQueryResultArticle(
             id=f"lobby_{code}",
             title="🔥 START 1-ON-1 GAME",
-            description="Start a private Truth or Dare game.",
+            description="Create a game",
             input_message_content=InputTextMessageContent(
                 "🔥 <b>TRUTH OR DARE</b>\n\n"
                 "👤 Player 1: waiting...\n"
-                "👤 Player 2: waiting...\n\n"
-                "Tap JOIN GAME.",
+                "👤 Player 2: waiting...",
                 parse_mode="HTML",
             ),
             reply_markup=InlineKeyboardMarkup([
@@ -272,21 +202,19 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             ]),
         )
 
-        await query.answer(
+        await q.answer(
             [result],
             cache_time=0,
             is_personal=True
         )
-
         return
 
     parts = text.split("|", 3)
-
     action = parts[0]
 
-    # ========================================================
+    # --------------------------------------------------------
     # ANSWER
-    # ========================================================
+    # --------------------------------------------------------
 
     if action == "answer":
 
@@ -295,337 +223,241 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         code = parts[1]
         challenge_id = parts[2]
-
-        answer_text = ""
-
-        if len(parts) >= 4:
-            answer_text = parts[3].strip()
+        answer = parts[3].strip() if len(parts) > 3 else ""
 
         game = games.get(code)
 
         if not game:
-            await query.answer([], cache_time=0)
             return
 
-        player = get_player(game, query.from_user.id)
+        player = get_player(game, q.from_user.id)
 
         if not player:
-            result = InlineQueryResultArticle(
-                id=f"not_player_{make_id()}",
-                title="❌ YOU ARE NOT IN THIS GAME",
-                input_message_content=InputTextMessageContent(
-                    "❌ You are not one of the players."
-                ),
-            )
-
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
+            await q.answer([], cache_time=0)
             return
 
-        # ----------------------------------------------------
-        # USER HAS NOT WRITTEN ANSWER YET
-        # ----------------------------------------------------
-
-        if not answer_text:
-
+        if not answer:
             result = InlineQueryResultArticle(
-                id=f"answer_help_{make_id()}",
+                id=f"answer_help_{uid()}",
                 title="✍️ TYPE YOUR ANSWER",
-                description="Type your answer and send it.",
+                description="Type your answer",
                 input_message_content=InputTextMessageContent(
-                    "✍️ Type your answer in the inline box."
+                    "✍️ Type your answer above."
                 ),
             )
 
-            await query.answer(
+            await q.answer(
                 [result],
                 cache_time=0,
                 is_personal=True
             )
-
             return
 
-        # ----------------------------------------------------
-        # IMPORTANT:
-        # OLD QUESTION CHECK COMES BEFORE TURN CHECK.
-        # ----------------------------------------------------
-
+        # OLD QUESTION CHECK FIRST
         if game["challenge_id"] != challenge_id:
 
-            # If the old question was pressed but this player
-            # currently has the turn, give them a usable panel.
-
+            # Give the player a usable current panel if it
+            # is actually their turn.
             if player == game["turn"]:
 
                 result = InlineQueryResultArticle(
-                    id=f"continue_{make_id()}",
+                    id=f"continue_{uid()}",
                     title="🎮 CONTINUE GAME",
-                    description="Choose your next Truth, Dare or Random.",
+                    description="Choose your next challenge",
                     input_message_content=InputTextMessageContent(
                         f"⚠️ <b>That question is already closed.</b>\n\n"
-                        f"🎯 <b>{get_name(game, player)}'s turn</b>\n\n"
-                        f"Choose your next challenge.",
+                        f"🎯 <b>{name(game, player)}'s turn</b>",
                         parse_mode="HTML",
                     ),
-                    reply_markup=challenge_buttons(code)
+                    reply_markup=game_buttons(code)
                 )
 
             else:
 
                 result = InlineQueryResultArticle(
-                    id=f"waiting_{make_id()}",
+                    id=f"wait_{uid()}",
                     title="⏳ WAIT FOR YOUR TURN",
-                    description=f"It's {get_name(game, game['turn'])}'s turn.",
+                    description=f"It's {name(game, game['turn'])}'s turn",
                     input_message_content=InputTextMessageContent(
-                        f"⚠️ <b>That question is already closed.</b>\n\n"
-                        f"⏳ It's <b>{get_name(game, game['turn'])}'s turn</b>.",
+                        f"⏳ It's <b>{name(game, game['turn'])}'s turn</b>.",
                         parse_mode="HTML",
                     ),
-                    reply_markup=challenge_buttons(code)
+                    reply_markup=game_buttons(code)
                 )
 
-            await query.answer(
+            await q.answer(
                 [result],
                 cache_time=0,
                 is_personal=True
             )
-
             return
 
-        # ----------------------------------------------------
-        # WRONG CHALLENGE TYPE
-        # ----------------------------------------------------
-
-        if game["challenge_type"] != "truth":
-
-            result = InlineQueryResultArticle(
-                id=f"closed_{make_id()}",
-                title="⚠️ QUESTION CLOSED",
-                input_message_content=InputTextMessageContent(
-                    "⚠️ This question is already closed."
-                ),
-            )
-
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # TURN CHECK
-        # ----------------------------------------------------
-
+        # WRONG TURN
         if player != game["turn"]:
 
             result = InlineQueryResultArticle(
-                id=f"wrong_turn_{make_id()}",
+                id=f"wrong_{uid()}",
                 title="⏳ NOT YOUR TURN",
-                description=f"It's {get_name(game, game['turn'])}'s turn.",
                 input_message_content=InputTextMessageContent(
-                    f"⏳ It's <b>{get_name(game, game['turn'])}'s turn</b>.",
+                    f"⏳ It's <b>{name(game, game['turn'])}'s turn</b>.",
                     parse_mode="HTML",
                 ),
             )
 
-            await query.answer(
+            await q.answer(
                 [result],
                 cache_time=0,
                 is_personal=True
             )
-
             return
 
-        # ----------------------------------------------------
         # COMPLETE TRUTH
-        # ----------------------------------------------------
+        if game["challenge_type"] != "truth":
+            return
 
-        answered_by = get_name(game, player)
+        old_player = player
 
         game["challenge_id"] = None
         game["challenge_type"] = None
-        game["challenge_text"] = None
         game["challenge_player"] = None
+        game["challenge_text"] = None
 
-        game["turn"] = other_player(player)
-
-        next_player = game["turn"]
+        game["turn"] = other(old_player)
 
         result = InlineQueryResultArticle(
-            id=f"answer_sent_{make_id()}",
-            title="✅ ANSWER",
+            id=f"answer_done_{uid()}",
+            title="✅ SEND ANSWER",
             input_message_content=InputTextMessageContent(
-                f"💬 <b>{answered_by}</b> answered:\n\n"
-                f"{answer_text}\n\n"
-                f"👉 <b>{get_name(game, next_player)}'s turn</b>",
+                f"💬 <b>{name(game, old_player)}</b> answered:\n\n"
+                f"{answer}\n\n"
+                f"👉 <b>{name(game, game['turn'])}'s turn</b>",
                 parse_mode="HTML",
             ),
-            reply_markup=challenge_buttons(code)
+            reply_markup=game_buttons(code)
         )
 
-        await query.answer(
+        await q.answer(
             [result],
             cache_time=0,
             is_personal=True
         )
-
         return
 
-    # ========================================================
+    # --------------------------------------------------------
     # TRUTH / DARE / RANDOM
-    # ========================================================
+    # --------------------------------------------------------
 
     if action not in ("truth", "dare", "random"):
-        await query.answer([], cache_time=0)
+        await q.answer([], cache_time=0)
         return
 
     if len(parts) < 2:
-        await query.answer([], cache_time=0)
         return
 
     code = parts[1]
-    previous_id = parts[2] if len(parts) >= 3 else ""
+    previous_id = parts[2] if len(parts) > 2 else ""
 
     game = games.get(code)
 
     if not game or not game["active"]:
-        await query.answer([], cache_time=0)
+        await q.answer([], cache_time=0)
         return
 
-    player = get_player(game, query.from_user.id)
+    player = get_player(game, q.from_user.id)
 
     if not player:
-        await query.answer([], cache_time=0)
+        await q.answer([], cache_time=0)
         return
 
-    # ========================================================
+    # --------------------------------------------------------
     # OLD PANEL CHECK FIRST
-    # ========================================================
+    # --------------------------------------------------------
 
     if game["challenge_id"]:
 
         if previous_id != game["challenge_id"]:
 
             result = InlineQueryResultArticle(
-                id=f"old_panel_{make_id()}",
-                title="⚠️ OLD GAME PANEL",
-                description="Use the newest game panel.",
+                id=f"old_{uid()}",
+                title="⚠️ OLD PANEL",
+                description="Use the newest panel",
                 input_message_content=InputTextMessageContent(
-                    "⚠️ <b>OLD GAME PANEL</b>\n\n"
-                    "Use the buttons on the newest panel.",
-                    parse_mode="HTML",
-                ),
-            )
-
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
-
-            return
-
-    else:
-
-        # No current challenge.
-        # A previous_id means this came from an old panel.
-
-        if previous_id:
-
-            result = InlineQueryResultArticle(
-                id=f"old_panel_{make_id()}",
-                title="⚠️ OLD GAME PANEL",
-                description="Use the newest game panel.",
-                input_message_content=InputTextMessageContent(
-                    "⚠️ <b>OLD GAME PANEL</b>\n\n"
+                    "⚠️ <b>This is an old panel.</b>\n\n"
                     "Use the newest game panel.",
                     parse_mode="HTML",
                 ),
-                reply_markup=challenge_buttons(code)
             )
 
-            await query.answer(
+            await q.answer(
                 [result],
                 cache_time=0,
                 is_personal=True
             )
-
             return
 
-    # ========================================================
+    # --------------------------------------------------------
     # TURN CHECK
-    # ========================================================
+    # --------------------------------------------------------
 
     if player != game["turn"]:
 
         result = InlineQueryResultArticle(
-            id=f"wrong_turn_{make_id()}",
+            id=f"turn_{uid()}",
             title="⏳ NOT YOUR TURN",
-            description=f"It's {get_name(game, game['turn'])}'s turn.",
+            description=f"It's {name(game, game['turn'])}'s turn",
             input_message_content=InputTextMessageContent(
-                f"⏳ It's <b>{get_name(game, game['turn'])}'s turn</b>.\n\n"
-                f"Please wait.",
+                f"⏳ It's <b>{name(game, game['turn'])}'s turn</b>.",
                 parse_mode="HTML",
             ),
         )
 
-        await query.answer(
+        await q.answer(
             [result],
             cache_time=0,
             is_personal=True
         )
-
         return
 
-    # ========================================================
-    # CURRENT TRUTH MUST BE ANSWERED
-    # ========================================================
+    # --------------------------------------------------------
+    # TRUTH MUST BE ANSWERED
+    # --------------------------------------------------------
 
-    if game["challenge_id"]:
+    if game["challenge_id"] and game["challenge_type"] == "truth":
 
-        if game["challenge_type"] == "truth":
+        result = InlineQueryResultArticle(
+            id=f"must_answer_{uid()}",
+            title="✍️ ANSWER CURRENT TRUTH",
+            description="Answer the current Truth first",
+            input_message_content=InputTextMessageContent(
+                "✍️ <b>Answer the current Truth first.</b>",
+                parse_mode="HTML",
+            ),
+        )
 
-            result = InlineQueryResultArticle(
-                id=f"must_answer_{make_id()}",
-                title="✍️ ANSWER CURRENT TRUTH",
-                description="Answer the current Truth first.",
-                input_message_content=InputTextMessageContent(
-                    "✍️ <b>Answer the current Truth first.</b>",
-                    parse_mode="HTML",
-                ),
-            )
+        await q.answer(
+            [result],
+            cache_time=0,
+            is_personal=True
+        )
+        return
 
-            await query.answer(
-                [result],
-                cache_time=0,
-                is_personal=True
-            )
+    # --------------------------------------------------------
+    # DARE COMPLETED
+    # --------------------------------------------------------
 
-            return
+    if game["challenge_id"] and game["challenge_type"] == "dare":
 
-        # ====================================================
-        # CURRENT DARE COMPLETED
-        # ====================================================
+        game["challenge_id"] = None
+        game["challenge_type"] = None
+        game["challenge_player"] = None
+        game["challenge_text"] = None
 
-        if game["challenge_type"] == "dare":
+        game["turn"] = other(player)
+        player = game["turn"]
 
-            game["challenge_id"] = None
-            game["challenge_type"] = None
-            game["challenge_text"] = None
-            game["challenge_player"] = None
-
-            game["turn"] = other_player(player)
-
-            player = game["turn"]
-
-    # ========================================================
-    # SELECT NEW CHALLENGE
-    # ========================================================
+    # --------------------------------------------------------
+    # CREATE NEW CHALLENGE
+    # --------------------------------------------------------
 
     if action == "random":
         challenge_type = random.choice(["truth", "dare"])
@@ -637,31 +469,25 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         challenge_text = random.choice(DARES)
 
-    challenge_id = make_id()
-
-    game["round"] += 1
+    challenge_id = uid()
 
     game["challenge_id"] = challenge_id
     game["challenge_type"] = challenge_type
-    game["challenge_text"] = challenge_text
     game["challenge_player"] = player
-
-    # ========================================================
-    # TRUTH
-    # ========================================================
+    game["challenge_text"] = challenge_text
 
     if challenge_type == "truth":
 
         message = (
             f"📝 <b>TRUTH</b>\n\n"
-            f"👤 <b>{get_name(game, player)}'s turn</b>\n\n"
+            f"👤 <b>{name(game, player)}'s turn</b>\n\n"
             f"{challenge_text}"
         )
 
         result = InlineQueryResultArticle(
             id=f"truth_{challenge_id}",
-            title=f"📝 TRUTH — {get_name(game, player)}",
-            description=challenge_text[:100],
+            title=f"📝 TRUTH — {name(game, player)}",
+            description=challenge_text,
             input_message_content=InputTextMessageContent(
                 message,
                 parse_mode="HTML",
@@ -669,37 +495,33 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
             reply_markup=answer_button(
                 code,
                 challenge_id
-            )
+            ),
         )
-
-    # ========================================================
-    # DARE
-    # ========================================================
 
     else:
 
         message = (
             f"🎯 <b>DARE</b>\n\n"
-            f"👤 <b>{get_name(game, player)}'s turn</b>\n\n"
+            f"👤 <b>{name(game, player)}'s turn</b>\n\n"
             f"{challenge_text}\n\n"
             f"Complete the dare, then choose the next challenge."
         )
 
         result = InlineQueryResultArticle(
             id=f"dare_{challenge_id}",
-            title=f"🎯 DARE — {get_name(game, player)}",
-            description=challenge_text[:100],
+            title=f"🎯 DARE — {name(game, player)}",
+            description=challenge_text,
             input_message_content=InputTextMessageContent(
                 message,
                 parse_mode="HTML",
             ),
-            reply_markup=challenge_buttons(
+            reply_markup=game_buttons(
                 code,
                 challenge_id
-            )
+            ),
         )
 
-    await query.answer(
+    await q.answer(
         [result],
         cache_time=0,
         is_personal=True
@@ -710,94 +532,65 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # CALLBACKS
 # ============================================================
 
-async def callback_handler(
-    update: Update,
-    context: ContextTypes.DEFAULT_TYPE
-):
+async def callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    query = update.callback_query
+    q = update.callback_query
+    await q.answer()
 
-    await query.answer()
+    parts = q.data.split("|", 1)
 
-    data = query.data
-
-    if not data:
+    if len(parts) != 2:
         return
-
-    parts = data.split("|", 1)
 
     action = parts[0]
-
-    if len(parts) < 2:
-        return
-
     code = parts[1]
 
     game = games.get(code)
 
     if not game:
-        await query.edit_message_text(
-            "❌ This game no longer exists."
-        )
+        await q.edit_message_text("❌ Game not found.")
         return
 
-    # ========================================================
+    # --------------------------------------------------------
     # JOIN
-    # ========================================================
+    # --------------------------------------------------------
 
     if action == "join":
 
-        user_id = query.from_user.id
-        name = query.from_user.first_name
+        user_id = q.from_user.id
+        username = q.from_user.first_name
 
-        if game["player1_id"] == user_id:
-
-            await query.answer(
-                "You are already Player 1.",
+        if game["p1_id"] == user_id or game["p2_id"] == user_id:
+            await q.answer(
+                "You already joined.",
                 show_alert=True
             )
-
             return
 
-        if game["player2_id"] == user_id:
+        if game["p1_id"] is None:
 
-            await query.answer(
-                "You are already Player 2.",
-                show_alert=True
-            )
+            game["p1_id"] = user_id
+            game["p1_name"] = username
 
-            return
+        elif game["p2_id"] is None:
 
-        if game["player1_id"] is None:
-
-            game["player1_id"] = user_id
-            game["player1_name"] = name
-
-        elif game["player2_id"] is None:
-
-            game["player2_id"] = user_id
-            game["player2_name"] = name
+            game["p2_id"] = user_id
+            game["p2_name"] = username
 
         else:
 
-            await query.answer(
-                "This game already has two players.",
+            await q.answer(
+                "Game is full.",
                 show_alert=True
             )
-
             return
 
-        # ----------------------------------------------------
-        # WAITING FOR PLAYER 2
-        # ----------------------------------------------------
+        if game["p2_id"] is None:
 
-        if game["player2_id"] is None:
-
-            await query.edit_message_text(
+            await q.edit_message_text(
                 f"🔥 <b>TRUTH OR DARE</b>\n\n"
-                f"👤 Player 1: <b>{game['player1_name']}</b>\n"
-                f"👤 Player 2: waiting...\n\n"
-                f"Waiting for Player 2.",
+                f"👤 Player 1: <b>{game['p1_name']}</b>\n"
+                f"👤 Player 2: waiting...",
                 parse_mode="HTML",
                 reply_markup=InlineKeyboardMarkup([
                     [
@@ -808,17 +601,91 @@ async def callback_handler(
                     ]
                 ])
             )
-
             return
 
-        # ----------------------------------------------------
-        # BOTH PLAYERS
-        # ----------------------------------------------------
+        game["turn"] = "p1"
 
-        game["turn"] = "player1"
-
-        await query.edit_message_text(
+        await q.edit_message_text(
             f"🔥 <b>TRUTH OR DARE</b>\n\n"
-            f"👤 Player 1: <b>{game['player1_name']}</b>\n"
-            f"👤 Player 2: <b>{game['player2_name']}</b>\n\n"
-            f"🎮
+            f"👤 Player 1: <b>{game['p1_name']}</b>\n"
+            f"👤 Player 2: <b>{game['p2_name']}</b>\n\n"
+            f"🎮 Both players are ready!\n\n"
+            f"▶️ <b>{game['p1_name']} starts.</b>",
+            parse_mode="HTML",
+            reply_markup=InlineKeyboardMarkup([
+                [
+                    InlineKeyboardButton(
+                        "▶️ START GAME",
+                        callback_data=f"start|{code}"
+                    )
+                ]
+            ])
+        )
+        return
+
+    # --------------------------------------------------------
+    # START
+    # --------------------------------------------------------
+
+    if action == "start":
+
+        if q.from_user.id not in (
+            game["p1_id"],
+            game["p2_id"]
+        ):
+            await q.answer(
+                "You are not in this game.",
+                show_alert=True
+            )
+            return
+
+        if not game["p1_id"] or not game["p2_id"]:
+            return
+
+        game["active"] = True
+        game["turn"] = "p1"
+
+        game["challenge_id"] = None
+        game["challenge_type"] = None
+        game["challenge_player"] = None
+        game["challenge_text"] = None
+
+        await q.edit_message_text(
+            f"🔥 <b>GAME STARTED</b>\n\n"
+            f"👤 Player 1: <b>{game['p1_name']}</b>\n"
+            f"👤 Player 2: <b>{game['p2_name']}</b>\n\n"
+            f"🎯 <b>{game['p1_name']}'s turn</b>",
+            parse_mode="HTML",
+            reply_markup=game_buttons(code)
+        )
+
+
+# ============================================================
+# MAIN
+# ============================================================
+
+def main():
+
+    app = Application.builder().token(TOKEN).build()
+
+    app.add_handler(
+        CommandHandler("start", start)
+    )
+
+    app.add_handler(
+        InlineQueryHandler(inline)
+    )
+
+    app.add_handler(
+        CallbackQueryHandler(callback)
+    )
+
+    print("🔥 NAUGHTYDARE BOT RUNNING")
+
+    app.run_polling(
+        allowed_updates=Update.ALL_TYPES
+    )
+
+
+if __name__ == "__main__":
+    main()
