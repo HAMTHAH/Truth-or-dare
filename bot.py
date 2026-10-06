@@ -296,14 +296,21 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.inline_query
     code = secrets.token_hex(5)
 
+    # Create and save the game immediately
+    games[code] = {
+        "players": [],
+        "turn": 0,
+        "started": False
+    }
+
     results = [
         InlineQueryResultArticle(
             id="start_game",
             title="🎮 START 1-ON-1 GAME",
-            description="Play Truth or Dare with another person",
+            description="Start a private Truth or Dare game",
             input_message_content=InputTextMessageContent(
                 "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
-                "Tap OPEN GAME to start your 1-on-1 game!"
+                "🎮 Tap OPEN GAME to start your 1-on-1 game!"
             ),
             reply_markup=InlineKeyboardMarkup([
                 [
@@ -316,7 +323,6 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
     ]
 
-    # Add the normal Truth/Dare results underneath
     for i in range(5):
         truth = random.choice(TRUTHS)
 
@@ -335,7 +341,7 @@ async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
         results=results,
         cache_time=0,
         is_personal=True
-    )
+        )
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
