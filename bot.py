@@ -126,11 +126,10 @@ DARES = [
 games = {}
 
 
-def create_game(user_id):
+def create_game():
     code = secrets.token_hex(5)
 
     games[code] = {
-        "creator": user_id,
         "girl": None,
         "boy": None,
         "active": False,
@@ -138,6 +137,7 @@ def create_game(user_id):
         "round": 0,
     }
 
+    print("GAME CREATED:", code)
     return code
 
 
@@ -156,7 +156,7 @@ def role_keyboard(code):
     ])
 
 
-def start_keyboard(code):
+def start_game_keyboard(code):
     return InlineKeyboardMarkup([
         [
             InlineKeyboardButton(
@@ -199,7 +199,7 @@ def challenge_keyboard(code):
 
 
 async def send_to_players(context, game, text, keyboard=None):
-    for role in ["girl", "boy"]:
+    for role in ("girl", "boy"):
         player = game.get(role)
 
         if player:
@@ -210,7 +210,7 @@ async def send_to_players(context, game, text, keyboard=None):
                     reply_markup=keyboard,
                 )
             except Exception as error:
-                print("Message error:", error)
+                print("SEND ERROR:", error)
 
 
 async def send_challenge(context, code, challenge_type="random"):
@@ -222,39 +222,43 @@ async def send_challenge(context, code, challenge_type="random"):
     if not game["girl"] or not game["boy"]:
         return
 
+    # Alternate turns
     if game["turn"] == "girl":
         game["turn"] = "boy"
-    elif game["turn"] == "boy":
-        game["turn"] = "girl"
     else:
-        game["turn"] = random.choice(["girl", "boy"])
+        game["turn"] = "girl"
 
     game["round"] += 1
 
     if challenge_type == "truth":
-        question = random.choice(TRUTHS)
+        challenge = random.choice(TRUTHS)
         title = "😈 TRUTH"
+
     elif challenge_type == "dare":
-        question = random.choice(DARES)
+        challenge = random.choice(DARES)
         title = "🔥 DARE"
+
     else:
         if random.choice([True, False]):
-            question = random.choice(TRUTHS)
+            challenge = random.choice(TRUTHS)
             title = "😈 TRUTH"
         else:
-            question = random.choice(DARES)
+            challenge = random.choice(DARES)
             title = "🔥 DARE"
 
     if game["turn"] == "girl":
-        player = "👩 GIRL"
+        player_name = game["girl"]["name"]
+        role_name = "👩 GIRL"
     else:
-        player = "👨 BOY"
+        player_name = game["boy"]["name"]
+        role_name = "👨 BOY"
 
     text = (
-        f"🔥 ROUND {game['round']}\n\n"
-        f"🎯 TURN: {player}\n\n"
+        f"🔥 ROUND {game['round']} 🔥\n\n"
+        f"🎯 TURN: {role_name}\n"
+        f"👤 {player_name}\n\n"
         f"{title}\n\n"
-        f"{question}"
+        f"{challenge}"
     )
 
     await send_to_players(
@@ -271,11 +275,15 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if context.args:
         code = context.args[0]
+
+        print("JOIN REQUEST:", code)
+
         game = games.get(code)
 
         if not game:
             await update.message.reply_text(
-                "❌ Game not found or expired."
+                "❌ Game not found or expired.\n\n"
+                "Please create a new game."
             )
             return
 
@@ -284,79 +292,129 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "Choose your role:",
             reply_markup=role_keyboard(code),
         )
+
         return
 
     await update.message.reply_text(
         "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
-        "Type @NAUGHTYDARE_bot in a chat to start."
+        "Use @NAUGHTYDARE_bot in a chat to start a 1-on-1 game."
     )
 
 
 async def inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.inline_query
-    code = create_game(None)
+    inline = update.inline_query
+
+    print("INLINE QUERY:", inline.query)
+
+    code = create_game()
+
+    bot_username = context.bot.username
 
     results = [
         InlineQueryResultArticle(
-            id="start_game",
+            id=f"start_{code}",
             title="🎮 START 1-ON-1 GAME",
-            description="Start a private Truth or Dare game",
+            description="Start a private game with another person",
             input_message_content=InputTextMessageContent(
                 "🔥 NAUGHTY TRUTH OR DARE 🔥\n\n"
-                "🎮 Tap OPEN GAME to start your 1-on-1 game!"
+                "🎮 1-on-1 game created!\n"
+                "Tap OPEN GAME to join."
             ),
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
                         "🎮 OPEN GAME",
-                        url=f"https://t.me/NAUGHTYDARE_bot?start={code}"
+                        url=f"https://t.me/{bot_username}?start={code}",
                     )
                 ]
-            ])
+            ]),
         )
     ]
 
+    # Normal Truth results
     for i in range(5):
         truth = random.choice(TRUTHS)
 
         results.append(
             InlineQueryResultArticle(
-                id=f"truth_{i}_{secrets.token_hex(4)}",
+                id=f"truth_{code}_{i}",
                 title="😈 TRUTH",
                 description=truth,
                 input_message_content=InputTextMessageContent(
                     f"😈 TRUTH\n\n{truth}"
-                )
+                ),
             )
         )
 
-    await query.answer(
+    # Normal Dare results
+    for i in range(5):
+        dare = random.choice(DARES)
+
+        results.append(
+            InlineQueryResultArticle(
+                id=f"dare_{code}_{i}",
+                title="🔥 DARE",
+                description=dare,
+                input_message_content=InputTextMessageContent(
+                    f"🔥 DARE\n\n{dare}"
+                ),
+            )
+        )
+
+    await inline.answer(
         results=results,
         cache_time=0,
-        is_personal=True
-        )
+        is_personal=True,
+    )
+
 
 async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+
     await query.answer()
 
-    parts = query.data.split(":")
+    data = query.data
+    parts = data.split(":")
+
     action = parts[0]
     code = parts[-1]
+
+    print("BUTTON:", data)
 
     game = games.get(code)
 
     if not game:
-        await query.message.reply_text(
-            "❌ Game expired."
+        await query.answer(
+            "❌ Game expired.",
+            show_alert=True,
         )
         return
 
     user = query.from_user
+    chat_id = update.effective_chat.id
+
+    # -------------------------
+    # ROLE SELECTION
+    # -------------------------
 
     if action == "role":
-        role = parts[1]
 
+        role_code = parts[1]
+
+        role = "girl" if role_code == "g" else "boy"
+
+        # Check if this user already joined
+        for existing_role in ("girl", "boy"):
+            existing = game.get(existing_role)
+
+            if existing and existing["user_id"] == user.id:
+                await query.answer(
+                    "You already joined this game.",
+                    show_alert=True,
+                )
+                return
+
+        # Check if role already taken
         if game[role]:
             await query.answer(
                 "That role is already taken.",
@@ -364,64 +422,59 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             )
             return
 
-        if (
-            game["girl"]
-            and game["girl"]["user_id"] == user.id
-        ):
-            await query.answer(
-                "You already joined this game.",
-                show_alert=True,
-            )
-            return
-
-        if (
-            game["boy"]
-            and game["boy"]["user_id"] == user.id
-        ):
-            await query.answer(
-                "You already joined this game.",
-                show_alert=True,
-            )
-            return
-
         game[role] = {
             "user_id": user.id,
             "name": user.first_name,
-            "chat_id": update.effective_chat.id,
+            "chat_id": chat_id,
         }
 
         await query.message.reply_text(
             "✅ You joined successfully!"
         )
 
+        print(
+            "PLAYER JOINED:",
+            role,
+            user.first_name,
+            code,
+        )
+
+        # Both players are ready
         if game["girl"] and game["boy"]:
-            text = (
-                "🔥 BOTH PLAYERS ARE READY!\n\n"
-                f"👩 Girl: {game['girl']['name']}\n"
-                f"👨 Boy: {game['boy']['name']}\n\n"
-                "Ready to play?"
-            )
 
             await send_to_players(
                 context,
                 game,
-                text,
-                start_keyboard(code),
+                "🔥 BOTH PLAYERS ARE READY! 🔥\n\n"
+                f"👩 Girl: {game['girl']['name']}\n"
+                f"👨 Boy: {game['boy']['name']}\n\n"
+                "Press START GAME when you're ready.",
+                start_game_keyboard(code),
             )
 
         else:
-            bot_name = context.bot.username
-            link = f"https://t.me/{bot_name}?start={code}"
+
+            bot_username = context.bot.username
+
+            link = (
+                f"https://t.me/{bot_username}"
+                f"?start={code}"
+            )
 
             await query.message.reply_text(
                 "⏳ Waiting for the other player.\n\n"
-                "Send them this link:\n\n"
+                "Send this link to them:\n\n"
                 f"{link}"
             )
 
         return
 
+    # -------------------------
+    # START GAME
+    # -------------------------
+
     if action == "begin":
+
         if not game["girl"] or not game["boy"]:
             await query.answer(
                 "Both players must join first.",
@@ -430,12 +483,15 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
         game["active"] = True
+        game["turn"] = None
+        game["round"] = 0
 
         await send_to_players(
             context,
             game,
             "🔥 GAME STARTED! 🔥\n\n"
-            "👩 Girl vs 👨 Boy",
+            "👩 GIRL vs 👨 BOY\n\n"
+            "Let the chaos begin. 😈",
         )
 
         await send_challenge(
@@ -446,7 +502,12 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
-    if action in ["truth", "dare", "random"]:
+    # -------------------------
+    # TRUTH / DARE / RANDOM
+    # -------------------------
+
+    if action in ("truth", "dare", "random"):
+
         if not game["active"]:
             await query.answer(
                 "Start the game first.",
@@ -462,19 +523,32 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         return
 
+    # -------------------------
+    # NEXT
+    # -------------------------
+
     if action == "next":
-        if game["active"]:
-            await send_challenge(
-                context,
-                code,
-                "random",
-            )
+
+        if not game["active"]:
+            return
+
+        await send_challenge(
+            context,
+            code,
+            "random",
+        )
+
         return
 
+    # -------------------------
+    # DONE
+    # -------------------------
+
     if action == "done":
+
         await query.message.reply_text(
             "✅ Challenge completed!\n\n"
-            "Ready for another one?",
+            "Ready for the next one?",
             reply_markup=InlineKeyboardMarkup([
                 [
                     InlineKeyboardButton(
@@ -487,6 +561,7 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
+
     if not BOT_TOKEN:
         raise RuntimeError(
             "BOT_TOKEN environment variable is missing."
@@ -506,7 +581,7 @@ def main():
         InlineQueryHandler(inline_query)
     )
 
-    print("NAUGHTYDARE BOT IS RUNNING")
+    print("🔥 NAUGHTYDARE BOT IS RUNNING 🔥")
 
     app.run_polling()
 
