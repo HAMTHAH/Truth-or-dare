@@ -230,6 +230,16 @@ DARES = [
     "Tell the group the boldest thing you've ever done for someone you liked.",
     "Send someone 'Okay, be honest... do you like me? 👀'",
     "End your turn by giving another player a sincere compliment."
+    "Send a picture of your legs.",
+    "Send a picture of your hands.",
+    "Send a picture of your lips.",
+    "Send a picture of your neck.",
+    "Send a picture of your outfit.",
+    "Send a picture showing your best pose.",
+    "Send a picture of your shoes.",
+    "Send a picture of your eyes.",
+    "Send a picture of your smile.",
+    "Send a picture of your best selfie."
 ]
 
 # ============================================================
