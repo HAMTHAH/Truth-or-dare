@@ -602,11 +602,11 @@ async def inline_query(
     # --------------------------------------------------------
 
     message = (
-        f"{emoji} <b>{title}</b>\n\n"
-        f"<b>{challenge}</b>\n\n"
-        f"🎯 <b>{current_name}'s turn</b>\n\n"
-        "When you're finished, choose the next challenge:"
-    )
+    f"<i>{emoji} {title}</i>\n\n"
+    f"<b>{challenge}</b>\n\n"
+    f"<i>🎯 {current_name}'s turn</i>\n\n"
+    "<i>When you're finished, choose the next challenge:</i>"
+)
 
     result = InlineQueryResultArticle(
         id=f"challenge_{challenge_id}",
